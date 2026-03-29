@@ -1,0 +1,270 @@
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-10">
+    <!-- Stat Cards -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:shadow-md transition">
+        <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-pnp-blue dark:text-blue-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-pnp-blue group-hover:text-white transition">
+            <i class="fas fa-file-invoice text-xl"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800 dark:text-white"><%= stats.totalReports %></p>
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Total Reports</p>
+    </div>
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:shadow-md transition">
+        <div class="w-12 h-12 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-red-600 group-hover:text-white transition">
+            <i class="fas fa-clock text-xl"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800 dark:text-white"><%= stats.pendingReports %></p>
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Pending Reports</p>
+    </div>
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:shadow-md transition">
+        <div class="w-12 h-12 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-green-600 group-hover:text-white transition">
+            <i class="fas fa-calendar-check text-xl"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800 dark:text-white"><%= stats.reportsThisMonth %></p>
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Reports This Month</p>
+    </div>
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:shadow-md transition">
+        <div class="w-12 h-12 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-yellow-600 group-hover:text-white transition">
+            <i class="fas fa-bullhorn text-xl"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800 dark:text-white"><%= stats.activeBulletins %></p>
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Active Bulletins</p>
+    </div>
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:shadow-md transition">
+        <div class="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+            <i class="fas fa-user-secret text-xl"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800 dark:text-white"><%= stats.tipsReceived %></p>
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Tips Received</p>
+    </div>
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:shadow-md transition">
+        <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">
+            <i class="fas fa-check-double text-xl"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800 dark:text-white"><%= stats.resolvedCases %></p>
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Resolved Cases</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+    <!-- Crime Trends Chart -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+        <h3 class="font-bold text-pnp-blue dark:text-white uppercase tracking-widest text-xs mb-6">Crime Trends (Last 6 Months)</h3>
+        <canvas id="trendsChart" height="200"></canvas>
+    </div>
+
+    <!-- Reports by Type Chart -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+        <h3 class="font-bold text-pnp-blue dark:text-white uppercase tracking-widest text-xs mb-6">Reports by Incident Type</h3>
+        <div class="h-[200px] flex items-center justify-center">
+            <canvas id="typeChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Recent Reports -->
+    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+        <div class="p-6 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-pnp-blue dark:text-white uppercase tracking-widest text-xs">Recent Incident Reports</h3>
+            <a href="/admin/reports" class="text-[10px] font-bold text-pnp-gold hover:underline uppercase tracking-widest">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 uppercase text-[10px] font-bold tracking-widest">
+                    <tr>
+                        <th class="px-6 py-4">Tracking No.</th>
+                        <th class="px-6 py-4">Type</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
+                    <% recentReports.forEach(report => { %>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition cursor-pointer" onclick="window.location='/admin/reports/<%= report.id %>'">
+                            <td class="px-6 py-4 font-mono font-bold text-pnp-blue dark:text-pnp-gold"><%= report.tracking_number %></td>
+                            <td class="px-6 py-4 font-medium text-gray-700 dark:text-gray-300"><%= report.type %></td>
+                            <td class="px-6 py-4">
+                                <% 
+                                    const statusColors = {
+                                        'Received': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+                                        'Under Review': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+                                        'Resolved': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+                                        'Closed': 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                    };
+                                %>
+                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest <%= statusColors[report.status] %>">
+                                    <%= report.status %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-400 text-xs"><%= new Date(report.created_at).toLocaleDateString() %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Activity Feed -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+        <div class="p-6 border-b border-gray-50 dark:border-slate-700">
+            <h3 class="font-bold text-pnp-blue dark:text-white uppercase tracking-widest text-xs">System Activity</h3>
+        </div>
+        <div class="p-6 space-y-6">
+            <% recentLogs.forEach(log => { %>
+                <div class="flex items-start space-x-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 text-pnp-blue dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-history text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-800 dark:text-gray-200"><%= log.username %> <span class="text-gray-400 font-normal"><%= log.action %></span></p>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-1"><%= log.details %></p>
+                        <p class="text-[9px] text-gray-300 dark:text-gray-500 mt-1 uppercase font-bold"><%= new Date(log.timestamp).toLocaleTimeString() %></p>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
+    <!-- Recent Tips -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+        <div class="p-6 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-pnp-blue dark:text-white uppercase tracking-widest text-xs">Recent Anonymous Tips</h3>
+            <a href="/admin/tips" class="text-[10px] font-bold text-pnp-gold hover:underline uppercase tracking-widest">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 uppercase text-[10px] font-bold tracking-widest">
+                    <tr>
+                        <th class="px-6 py-4">Tip ID</th>
+                        <th class="px-6 py-4">Concern</th>
+                        <th class="px-6 py-4">Location</th>
+                        <th class="px-6 py-4">Flagged</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
+                    <% recentTips.forEach(tip => { %>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
+                            <td class="px-6 py-4 font-mono font-bold text-pnp-blue dark:text-pnp-gold"><%= tip.tip_id %></td>
+                            <td class="px-6 py-4 font-medium text-gray-700 dark:text-gray-300"><%= tip.concern_type %></td>
+                            <td class="px-6 py-4 text-gray-500 dark:text-gray-400"><%= tip.location_text %></td>
+                            <td class="px-6 py-4">
+                                <% if (tip.is_flagged) { %>
+                                    <span class="text-red-500"><i class="fas fa-flag"></i></span>
+                                <% } else { %>
+                                    <span class="text-gray-200 dark:text-gray-700"><i class="fas fa-flag"></i></span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Trends Chart
+    const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+    const isDark = document.documentElement.classList.contains('dark');
+    const chartTextColor = isDark ? '#94a3b8' : '#64748b';
+    const chartGridColor = isDark ? '#334155' : '#f1f5f9';
+
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: <%- JSON.stringify(reportsByMonth.map(m => m.month)) %>,
+            datasets: [{
+                label: 'Reports',
+                data: <%- JSON.stringify(reportsByMonth.map(m => m.count)) %>,
+                borderColor: '#1A3A5C',
+                backgroundColor: 'rgba(26, 58, 92, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#C8A415',
+                pointBorderColor: '#fff',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { stepSize: 1, color: chartTextColor },
+                    grid: { color: chartGridColor }
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { color: chartTextColor }
+                }
+            }
+        }
+    });
+
+    // Type Chart
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: <%- JSON.stringify(reportsByType.map(t => t.type)) %>,
+            datasets: [{
+                data: <%- JSON.stringify(reportsByType.map(t => t.count)) %>,
+                backgroundColor: [
+                    '#1A3A5C', '#C8A415', '#EF4444', '#F59E0B', '#8B5CF6', '#6B7280'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12,
+                        font: { size: 10, weight: 'bold' },
+                        padding: 15,
+                        color: chartTextColor
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // Listen for dark mode changes to update charts
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                const isDarkNow = document.documentElement.classList.contains('dark');
+                const newTextColor = isDarkNow ? '#94a3b8' : '#64748b';
+                const newGridColor = isDarkNow ? '#334155' : '#f1f5f9';
+                
+                // Update Trends Chart
+                const trendsChart = Chart.getChart('trendsChart');
+                if (trendsChart) {
+                    trendsChart.options.scales.y.ticks.color = newTextColor;
+                    trendsChart.options.scales.y.grid.color = newGridColor;
+                    trendsChart.options.scales.x.ticks.color = newTextColor;
+                    trendsChart.update();
+                }
+
+                // Update Type Chart
+                const typeChart = Chart.getChart('typeChart');
+                if (typeChart) {
+                    typeChart.options.plugins.legend.labels.color = newTextColor;
+                    typeChart.update();
+                }
+            }
+        });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+</script>

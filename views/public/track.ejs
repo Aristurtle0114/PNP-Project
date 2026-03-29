@@ -1,0 +1,102 @@
+<div class="max-w-2xl mx-auto px-4 py-20">
+    <div class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
+        <div class="bg-pnp-blue p-12 text-center relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="w-20 h-20 bg-pnp-gold text-pnp-blue rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                    <i class="fas fa-magnifying-glass-location text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-black text-white mb-2 tracking-tighter uppercase">Track Your Report</h1>
+                <p class="text-blue-200 text-sm font-bold uppercase tracking-widest">Enter your tracking number below</p>
+            </div>
+            <div class="absolute top-0 left-0 w-64 h-64 bg-white/5 -translate-y-1/2 -translate-x-1/2 rounded-full"></div>
+        </div>
+
+        <div class="p-12">
+            <form action="/track" method="GET" class="space-y-8">
+                <div class="space-y-2">
+                    <label for="tracking_number" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Tracking Number</label>
+                    <div class="relative">
+                        <input type="text" name="tracking_number" id="tracking_number" required placeholder="STC-2026-XXXXX" class="w-full pl-14 pr-6 py-5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-mono font-bold text-xl text-pnp-blue dark:text-pnp-gold tracking-widest">
+                        <i class="fas fa-hashtag absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 text-xl"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-pnp-blue hover:bg-blue-900 text-white font-black py-5 rounded-2xl shadow-2xl transition duration-300 transform hover:-translate-y-1 flex items-center justify-center space-x-3 uppercase tracking-widest text-sm">
+                    <span>Search Report Status</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+
+            <% if (typeof report !== 'undefined') { %>
+                <% if (report) { %>
+                    <div class="mt-12 p-8 bg-gray-50 dark:bg-slate-900/50 rounded-[2rem] border-2 border-pnp-blue/10 dark:border-slate-700 animate-fade-in">
+                        <div class="flex justify-between items-start mb-8">
+                            <div>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold mb-1">Current Status</p>
+                                <% 
+                                    const statusColors = {
+                                        'Received': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+                                        'Under Review': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+                                        'Resolved': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+                                        'Closed': 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                    };
+                                %>
+                                <span class="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest <%= statusColors[report.status] %>">
+                                    <%= report.status %>
+                                </span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold mb-1">Date Filed</p>
+                                <p class="text-sm font-bold text-gray-700 dark:text-gray-300"><%= new Date(report.created_at).toLocaleDateString() %></p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold mb-1">Incident Type</p>
+                                <p class="text-lg font-black text-pnp-blue dark:text-pnp-gold"><%= report.type %></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold mb-1">Location</p>
+                                <p class="text-sm font-bold text-gray-600 dark:text-gray-400"><%= report.location_text %></p>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="pt-4">
+                                <div class="flex justify-between text-[8px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">
+                                    <span>Received</span>
+                                    <span>Review</span>
+                                    <span>Resolved</span>
+                                </div>
+                                <div class="h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                    <% 
+                                        let progress = '33%';
+                                        if (report.status === 'Under Review') progress = '66%';
+                                        if (report.status === 'Resolved' || report.status === 'Closed') progress = '100%';
+                                    %>
+                                    <div class="h-full bg-pnp-gold transition-all duration-1000" style="width: <%= progress %>"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="mt-12 p-8 bg-red-50 dark:bg-red-900/20 rounded-[2rem] border-2 border-red-100 dark:border-red-900/30 text-center animate-fade-in">
+                        <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3 class="text-lg font-black text-red-800 dark:text-red-400 mb-2">Report Not Found</h3>
+                        <p class="text-sm text-red-600 dark:text-red-300">Please double-check your tracking number and try again.</p>
+                    </div>
+                <% } %>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+</style>

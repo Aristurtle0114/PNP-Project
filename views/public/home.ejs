@@ -1,0 +1,118 @@
+<!-- Hero Section -->
+<section class="bg-pnp-blue text-white py-20 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10 bg-cover bg-center" style="background-image: url('https://picsum.photos/seed/police/1920/1080');"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-pnp-gold mb-4 tracking-tight">PNP STA. CRUZ, LAGUNA</h1>
+        <p class="text-xl md:text-2xl font-light mb-8 max-w-3xl mx-auto">Serving and Protecting the community of Sta. Cruz with integrity and commitment.</p>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="/report" class="bg-pnp-gold hover:bg-yellow-600 text-pnp-blue font-bold py-3 px-8 rounded-full shadow-lg transition duration-300">Report Incident</a>
+            <a href="/tip" class="bg-white hover:bg-gray-100 text-pnp-blue font-bold py-3 px-8 rounded-full shadow-lg transition duration-300">Submit Tip</a>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="py-12 bg-white dark:bg-slate-800 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <a href="/report" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-pnp-blue dark:text-blue-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-pnp-blue group-hover:text-white transition">
+                    <i class="fas fa-file-signature text-2xl"></i>
+                </div>
+                <span class="font-bold text-gray-800 dark:text-gray-200">Report Incident</span>
+            </a>
+            <a href="/map" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
+                <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-red-600 group-hover:text-white transition">
+                    <i class="fas fa-map-location-dot text-2xl"></i>
+                </div>
+                <span class="font-bold text-gray-800 dark:text-gray-200">Crime Map</span>
+            </a>
+            <a href="/bulletins" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
+                <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-yellow-600 group-hover:text-white transition">
+                    <i class="fas fa-bullhorn text-2xl"></i>
+                </div>
+                <span class="font-bold text-gray-800 dark:text-gray-200">Bulletins</span>
+            </a>
+            <a href="/tip" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
+                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+                    <i class="fas fa-user-secret text-2xl"></i>
+                </div>
+                <span class="font-bold text-gray-800 dark:text-gray-200">Submit Tip</span>
+            </a>
+            <a href="/track" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-green-600 group-hover:text-white transition">
+                    <i class="fas fa-magnifying-glass text-2xl"></i>
+                </div>
+                <span class="font-bold text-gray-800 dark:text-gray-200">Track Report</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="bg-gray-100 dark:bg-slate-900 py-8 border-y border-gray-200 dark:border-slate-800 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+                <p class="text-3xl font-bold text-pnp-blue dark:text-pnp-gold"><%= stats.totalReports %></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold">Reports This Month</p>
+            </div>
+            <div>
+                <p class="text-3xl font-bold text-pnp-blue dark:text-pnp-gold"><%= stats.activeBulletins %></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold">Active Bulletins</p>
+            </div>
+            <div>
+                <p class="text-3xl font-bold text-pnp-blue dark:text-pnp-gold"><%= stats.resolvedCases %></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold">Resolved Cases</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission & Vision -->
+<section class="py-16 bg-white dark:bg-slate-800 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+                <img src="https://picsum.photos/seed/sta-cruz/600/400" alt="Sta. Cruz" class="rounded-2xl shadow-2xl dark:opacity-80">
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-pnp-blue dark:text-white border-l-4 border-pnp-gold pl-4 mb-4 uppercase tracking-wider">Our Mission</h2>
+                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">To enforce the law, to prevent and control crimes, to maintain peace and order, and to ensure public safety and internal security with the active support of the community.</p>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-pnp-blue dark:text-white border-l-4 border-pnp-gold pl-4 mb-4 uppercase tracking-wider">Our Vision</h2>
+                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">Imploring the aid of the Almighty, by 2030, PNP Sta. Cruz shall be a highly capable, effective and credible police service working in partnership with a responsive community towards the attainment of a safer place to live, work and do business.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Emergency Hotlines -->
+<section class="py-16 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-pnp-blue dark:text-white mb-4">Emergency Hotlines</h2>
+            <p class="text-gray-600 dark:text-gray-400">Quick access to essential services in Sta. Cruz, Laguna.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% hotlines.forEach(hotline => { %>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-phone-volume"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 dark:text-gray-200"><%= hotline.name %></h3>
+                        <p class="text-red-600 dark:text-red-400 font-mono text-lg font-bold"><%= hotline.number %></p>
+                        <span class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest"><%= hotline.category %></span>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+        <div class="text-center mt-10">
+            <a href="/hotlines" class="text-pnp-blue dark:text-pnp-gold font-bold hover:text-pnp-gold underline">View All Hotlines</a>
+        </div>
+    </div>
+</section>

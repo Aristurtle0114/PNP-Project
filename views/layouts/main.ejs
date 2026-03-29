@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPICRS - PNP Sta. Cruz, Laguna</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        pnp: {
+                            blue: '#1A3A5C',
+                            gold: '#C8A415',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        // Check for dark mode preference
+        if (localStorage.getItem('darkMode') === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .bg-pnp-blue { background-color: #1A3A5C; }
+        .text-pnp-blue { color: #1A3A5C; }
+        .bg-pnp-gold { background-color: #C8A415; }
+        .text-pnp-gold { color: #C8A415; }
+        .border-pnp-gold { border-color: #C8A415; }
+        
+        /* Dark mode overrides for custom classes if needed */
+        .dark .bg-gray-50 { background-color: #0f172a; }
+        .dark .bg-white { background-color: #1e293b; }
+        .dark .text-gray-800 { color: #f1f5f9; }
+        .dark .text-gray-700 { color: #e2e8f0; }
+        .dark .text-gray-600 { color: #cbd5e1; }
+        .dark .text-gray-500 { color: #94a3b8; }
+        .dark .text-gray-400 { color: #64748b; }
+        .dark .border-gray-100 { border-color: #334155; }
+        .dark .border-gray-200 { border-color: #475569; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-slate-900 flex flex-col min-h-screen transition-colors duration-300">
+    <!-- Header -->
+    <header class="bg-pnp-blue text-white sticky top-0 z-50 shadow-2xl border-b-4 border-pnp-gold">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-20 md:h-24">
+                <!-- Logo -->
+                <a href="/" class="flex items-center space-x-4 group">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition duration-300">
+                        <i class="fas fa-shield-halved text-pnp-blue text-2xl md:text-3xl"></i>
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="text-lg md:text-xl font-black tracking-tighter leading-none">CPICRS <span class="text-pnp-gold">STA. CRUZ</span></h1>
+                        <p class="text-[10px] md:text-xs text-blue-200 uppercase tracking-widest font-bold mt-1">Municipal Police Station</p>
+                    </div>
+                </a>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden lg:flex items-center space-x-1">
+                    <a href="/" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Home</a>
+                    <a href="/report" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Report</a>
+                    <a href="/track" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Track</a>
+                    <a href="/map" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Crime Map</a>
+                    <a href="/bulletins" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Bulletins</a>
+                    <a href="/tip" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Submit Tip</a>
+                    <a href="/hotlines" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Hotlines</a>
+                    <a href="/about" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">About</a>
+                </nav>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <button id="darkModeToggle" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white transition duration-300">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block text-pnp-gold"></i>
+                    </button>
+
+                    <a href="/admin/login" class="hidden md:flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition duration-300 border border-white/20">
+                        <i class="fas fa-lock text-[10px]"></i>
+                        <span>Admin</span>
+                    </a>
+                    
+                    <!-- Mobile Menu Toggle -->
+                    <button id="mobileMenuBtn" class="lg:hidden w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" class="fixed inset-0 bg-pnp-blue z-[100] hidden flex flex-col p-8 animate-fade-in">
+        <div class="flex justify-between items-center mb-12">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center">
+                    <i class="fas fa-shield-halved text-pnp-blue text-2xl"></i>
+                </div>
+                <h1 class="text-white text-xl font-black tracking-tighter">CPICRS</h1>
+            </div>
+            <button id="closeMenuBtn" class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="flex flex-col space-y-4">
+            <a href="/" class="text-2xl font-black text-white hover:text-pnp-gold transition">Home</a>
+            <a href="/report" class="text-2xl font-black text-white hover:text-pnp-gold transition">Report Incident</a>
+            <a href="/track" class="text-2xl font-black text-white hover:text-pnp-gold transition">Track Report</a>
+            <a href="/map" class="text-2xl font-black text-white hover:text-pnp-gold transition">Crime Map</a>
+            <a href="/bulletins" class="text-2xl font-black text-white hover:text-pnp-gold transition">Bulletins</a>
+            <a href="/tip" class="text-2xl font-black text-white hover:text-pnp-gold transition">Submit Tip</a>
+            <a href="/hotlines" class="text-2xl font-black text-white hover:text-pnp-gold transition">Hotlines</a>
+            <a href="/about" class="text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
+            <a href="/admin/login" class="text-2xl font-black text-pnp-gold pt-8">Admin Portal</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <%- body %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-20 pb-10">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center">
+                            <i class="fas fa-shield-halved text-pnp-blue text-2xl"></i>
+                        </div>
+                        <h1 class="text-xl font-black tracking-tighter">CPICRS</h1>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Official crime prevention and incident reporting portal for the Municipality of Sta. Cruz, Laguna. Working together for a safer community.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-white/5 hover:bg-pnp-blue hover:text-white rounded-xl flex items-center justify-center transition duration-300 text-gray-400">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/5 hover:bg-pnp-blue hover:text-white rounded-xl flex items-center justify-center transition duration-300 text-gray-400">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/5 hover:bg-pnp-blue hover:text-white rounded-xl flex items-center justify-center transition duration-300 text-gray-400">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-8">Quick Links</h4>
+                    <ul class="space-y-4 text-sm text-gray-400">
+                        <li><a href="/report" class="hover:text-white transition">Report an Incident</a></li>
+                        <li><a href="/track" class="hover:text-white transition">Track Case Status</a></li>
+                        <li><a href="/map" class="hover:text-white transition">Crime Statistics Map</a></li>
+                        <li><a href="/bulletins" class="hover:text-white transition">Public Advisories</a></li>
+                        <li><a href="/tip" class="hover:text-white transition">Anonymous Tip Line</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-8">Contact Us</h4>
+                    <ul class="space-y-4 text-sm text-gray-400">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-location-dot mt-1 text-pnp-gold"></i>
+                            <span>Municipal Hall Compound, Sta. Cruz, Laguna, Philippines</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-pnp-gold"></i>
+                            <span>(049) 123-4567 / 911</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-pnp-gold"></i>
+                            <span>pnp.stacruz@laguna.gov.ph</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-8">Emergency</h4>
+                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">National Emergency</p>
+                        <p class="text-4xl font-black text-white tracking-tighter mb-4">911</p>
+                        <p class="text-xs text-gray-400 leading-relaxed">Available 24/7 for immediate police, fire, or medical assistance.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">
+                    &copy; 2026 PNP Sta. Cruz Municipal Police Station. All Rights Reserved.
+                </p>
+                <div class="flex space-x-8 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                    <a href="#" class="hover:text-white transition">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition">Terms of Service</a>
+                    <a href="/admin/login" class="hover:text-white transition">Admin Login</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+
+        // Dark Mode Logic
+        darkModeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+        });
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+    </script>
+</body>
+</html>

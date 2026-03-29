@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pnp-blue: #1A3A5C;
+  --color-pnp-gold: #C8A415;
+}

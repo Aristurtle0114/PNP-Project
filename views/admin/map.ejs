@@ -1,0 +1,134 @@
+<style>
+    /* Dark Mode Map Filter */
+    .dark #adminMap {
+        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+    }
+    .dark .leaflet-container {
+        background: #0f172a;
+    }
+    .dark .leaflet-popup-content-wrapper, .dark .leaflet-popup-tip {
+        background-color: #1e293b;
+        color: #f8fafc;
+    }
+</style>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-160px)]">
+    <!-- Map Area -->
+    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden relative z-0">
+        <div id="adminMap" class="h-full w-full"></div>
+        <div class="absolute top-4 right-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-700 z-[1000] text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest">
+            <i class="fas fa-info-circle mr-2 text-pnp-gold"></i>
+            Click map to add new point
+        </div>
+    </div>
+
+    <!-- Sidebar: Add Point Form -->
+    <div class="space-y-8 overflow-y-auto pr-2">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+            <div class="p-6 border-b border-gray-50 dark:border-slate-700">
+                <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs">Add Map Point</h3>
+            </div>
+            <form action="/admin/map/add" method="POST" class="p-6 space-y-6" id="addPointForm">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Latitude</label>
+                        <input type="text" name="lat" id="lat" required readonly class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-mono dark:text-white">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Longitude</label>
+                        <input type="text" name="lng" id="lng" required readonly class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-mono dark:text-white">
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label for="incident_type" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Incident Type</label>
+                    <select name="incident_type" id="incident_type" required class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+                        <option value="Theft">Theft</option>
+                        <option value="Vandalism">Vandalism</option>
+                        <option value="Assault">Assault</option>
+                        <option value="Suspicious Activity">Suspicious Activity</option>
+                        <option value="Robbery">Robbery</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="incident_date" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Incident Date</label>
+                    <input type="date" name="incident_date" id="incident_date" required class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+                </div>
+
+                <button type="submit" class="w-full bg-pnp-blue text-white font-bold py-4 rounded-xl shadow-lg transition duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs">
+                    Add Point to Map
+                </button>
+            </form>
+        </div>
+
+        <!-- Legend -->
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <h4 class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Color Codes</h4>
+            <div class="space-y-3">
+                <div class="flex items-center space-x-3">
+                    <span class="w-3 h-3 rounded-full bg-red-600"></span>
+                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Theft</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Vandalism</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="w-3 h-3 rounded-full bg-red-900"></span>
+                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Assault</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Suspicious Activity</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="w-3 h-3 rounded-full bg-purple-600"></span>
+                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Robbery</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="w-3 h-3 rounded-full bg-gray-500"></span>
+                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Other</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const map = L.map('adminMap').setView([14.2800, 121.7700], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const colors = {
+        'Theft': 'red',
+        'Vandalism': 'orange',
+        'Assault': 'darkred',
+        'Suspicious Activity': 'yellow',
+        'Robbery': 'purple',
+        'Other': 'gray'
+    };
+
+    // Render Existing Points
+    <% points.forEach(p => { %>
+        L.circleMarker([<%= p.lat %>, <%= p.lng %>], {
+            radius: 8,
+            fillColor: colors['<%= p.incident_type %>'] || 'gray',
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup('<b><%= p.incident_type %></b><br><%= new Date(p.incident_date).toLocaleDateString() %>');
+    <% }) %>
+
+    // Handle Click to Add
+    let tempMarker;
+    map.on('click', function(e) {
+        if (tempMarker) map.removeLayer(tempMarker);
+        tempMarker = L.marker(e.latlng).addTo(map);
+        document.getElementById('lat').value = e.latlng.lat.toFixed(6);
+        document.getElementById('lng').value = e.latlng.lng.toFixed(6);
+    });
+</script>
