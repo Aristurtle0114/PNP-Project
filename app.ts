@@ -49,13 +49,29 @@ app.use((req, res, next) => {
 import publicRoutes from './routes/public.ts';
 import adminRoutes from './routes/admin.ts';
 
+// Favicon handler to prevent 500/404 noise
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 app.use('/', publicRoutes);
 app.use('/admin', adminRoutes);
 
+// 404 Handler
+app.use((req, res, next) => {
+  res.status(404).render('error', { 
+    error: new Error('The page you are looking for does not exist.')
+  });
+});
+
 // Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).render('error', { error: err });
+  console.error('Server Error:', err);
+  const status = err.status || 500;
+  res.status(status).render('error', { 
+    error: {
+      message: err.message || 'An unexpected error occurred.',
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    }
+  });
 });
 
 export default app;
