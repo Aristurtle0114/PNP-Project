@@ -50,6 +50,18 @@
         .dark .text-gray-400 { color: #64748b; }
         .dark .border-gray-100 { border-color: #334155; }
         .dark .border-gray-200 { border-color: #475569; }
+
+        /* Leaflet Dark Mode Support */
+        .dark .leaflet-tile {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+        .dark .leaflet-container {
+            background: #0f172a;
+        }
+        .dark .leaflet-popup-content-wrapper, .dark .leaflet-popup-tip {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-slate-900 flex flex-col min-h-screen transition-colors duration-300">

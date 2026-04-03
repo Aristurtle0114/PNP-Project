@@ -1,22 +1,20 @@
-<style>
-    /* Dark Mode Map Filter */
-    .dark #adminMap {
-        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-    }
-    .dark .leaflet-container {
-        background: #0f172a;
-    }
-    .dark .leaflet-popup-content-wrapper, .dark .leaflet-popup-tip {
-        background-color: #1e293b;
-        color: #f8fafc;
-    }
-</style>
-
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-160px)]">
     <!-- Map Area -->
     <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden relative z-0">
-        <div id="adminMap" class="h-full w-full"></div>
-        <div class="absolute top-4 right-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-700 z-[1000] text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest">
+        <!-- Map Search -->
+        <div class="absolute top-4 left-4 right-4 md:right-auto md:w-80 z-[1000]">
+            <div class="relative group">
+                <input type="text" id="mapSearchInput" placeholder="Search location in Sta. Cruz..." class="w-full pl-10 pr-4 py-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition-all duration-300 shadow-2xl dark:text-white">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-pnp-blue transition"></i>
+                <button type="button" onclick="searchLocation()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-pnp-blue text-white px-3 py-1.5 rounded-lg hover:bg-blue-900 transition text-[10px] font-black uppercase tracking-widest">
+                    Go
+                </button>
+            </div>
+            <p id="searchError" class="mt-2 px-3 py-1 bg-red-500 text-white text-[9px] font-black uppercase rounded-lg hidden shadow-lg">Location not found in Sta. Cruz</p>
+        </div>
+
+        <div id="leafletMap" class="h-full w-full"></div>
+        <div class="absolute bottom-4 right-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-700 z-[1000] text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest">
             <i class="fas fa-info-circle mr-2 text-pnp-gold"></i>
             Click map to add new point
         </div>
@@ -97,38 +95,180 @@
 </div>
 
 <script>
-    const map = L.map('adminMap').setView([14.2800, 121.7700], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
+    let map;
+    let tempMarker;
+    let santaCruzGeoJSON;
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.0.1.json';
     const colors = {
-        'Theft': 'red',
-        'Vandalism': 'orange',
-        'Assault': 'darkred',
-        'Suspicious Activity': 'yellow',
-        'Robbery': 'purple',
-        'Other': 'gray'
+        'Theft': '#dc2626',
+        'Vandalism': '#f97316',
+        'Assault': '#7f1d1d',
+        'Suspicious Activity': '#eab308',
+        'Robbery': '#9333ea',
+        'Other': '#6b7280'
     };
 
-    // Render Existing Points
-    <% points.forEach(p => { %>
-        L.circleMarker([<%= p.lat %>, <%= p.lng %>], {
-            radius: 8,
-            fillColor: colors['<%= p.incident_type %>'] || 'gray',
-            color: '#fff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.8
-        }).addTo(map).bindPopup('<b><%= p.incident_type %></b><br><%= new Date(p.incident_date).toLocaleDateString() %>');
-    <% }) %>
+    function initMap() {
+        try {
+            const center = [14.2811, 121.4150];
+            map = L.map('leafletMap', {
+                center: center,
+                zoom: 14,
+                zoomControl: false,
+                dragging: false,
+                touchZoom: false,
+                doubleClickZoom: false,
+                scrollWheelZoom: false,
+                boxZoom: false,
+                keyboard: false,
+                attributionControl: false
+            });
 
-    // Handle Click to Add
-    let tempMarker;
-    map.on('click', function(e) {
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(map);
+
+            // Load GeoJSON for geofencing
+            fetch(barangayGeoJsonUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    santaCruzGeoJSON = data;
+                    L.geoJSON(data, {
+                        style: {
+                            fillColor: '#1A3A5C',
+                            fillOpacity: 0.05,
+                            weight: 1,
+                            color: '#C8A415'
+                        }
+                    }).addTo(map);
+                })
+                .catch(err => console.error('Error loading GeoJSON for geofencing:', err));
+
+            // Render Existing Points
+            <% points.forEach(p => { %>
+                L.circle([<%= p.lat %>, <%= p.lng %>], {
+                    color: '#FFFFFF',
+                    fillColor: colors['<%= p.incident_type %>'] || '#6b7280',
+                    fillOpacity: 0.8,
+                    radius: 50,
+                    weight: 2
+                }).addTo(map);
+            <% }) %>
+
+            map.on('click', (e) => {
+                const latlng = e.latlng;
+                setMarker(latlng);
+            });
+        } catch (err) {
+            console.error('Error initializing admin map:', err);
+        }
+    }
+
+    function setMarker(latlng) {
+        if (santaCruzGeoJSON && !checkGeofence(latlng)) {
+            alert('Please select a location within Santa Cruz, Laguna.');
+            return false;
+        }
+
         if (tempMarker) map.removeLayer(tempMarker);
-        tempMarker = L.marker(e.latlng).addTo(map);
-        document.getElementById('lat').value = e.latlng.lat.toFixed(6);
-        document.getElementById('lng').value = e.latlng.lng.toFixed(6);
+        tempMarker = L.marker(latlng).addTo(map);
+
+        document.getElementById('lat').value = latlng.lat.toFixed(6);
+        document.getElementById('lng').value = latlng.lng.toFixed(6);
+        return true;
+    }
+
+    async function searchLocation() {
+        const input = document.getElementById('mapSearchInput');
+        const error = document.getElementById('searchError');
+        const query = input.value.trim();
+        
+        if (!query) return;
+
+        error.classList.add('hidden');
+        
+        try {
+            // Viewbox for Sta. Cruz, Laguna
+            const viewbox = '121.35,14.32,121.48,14.25';
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Santa Cruz, Laguna')}&viewbox=${viewbox}&bounded=1&limit=1`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const result = data[0];
+                const latlng = L.latLng(parseFloat(result.lat), parseFloat(result.lon));
+
+                if (setMarker(latlng)) {
+                    map.flyTo(latlng, 16, { duration: 1.5 });
+                } else {
+                    error.textContent = "Location found but outside Santa Cruz perimeter.";
+                    error.classList.remove('hidden');
+                    setTimeout(() => {
+                        error.classList.add('hidden');
+                        error.textContent = "Location not found in Sta. Cruz";
+                    }, 3000);
+                }
+            } else {
+                error.classList.remove('hidden');
+                setTimeout(() => error.classList.add('hidden'), 3000);
+            }
+        } catch (err) {
+            console.error('Search error:', err);
+            error.classList.remove('hidden');
+            setTimeout(() => error.classList.add('hidden'), 3000);
+        }
+    }
+
+    // Add enter key support for search
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && document.activeElement.id === 'mapSearchInput') {
+            e.preventDefault();
+            searchLocation();
+        }
     });
+
+    // Simple Point in Polygon function
+    function isPointInPolygon(point, vs) {
+        const x = point[0], y = point[1];
+        let inside = false;
+        
+        if (Array.isArray(vs[0][0][0])) {
+            for (let i = 0; i < vs.length; i++) {
+                if (isPointInPolygon(point, vs[i])) return true;
+            }
+            return false;
+        }
+
+        const polygon = Array.isArray(vs[0][0]) ? vs[0] : vs;
+
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            const xi = polygon[i][0], yi = polygon[i][1];
+            const xj = polygon[j][0], yj = polygon[j][1];
+            const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
+    function checkGeofence(latlng) {
+        let isInside = false;
+        if (santaCruzGeoJSON) {
+            const point = [latlng.lng, latlng.lat];
+            for (const feature of santaCruzGeoJSON.features) {
+                if (isPointInPolygon(point, feature.geometry.coordinates)) {
+                    isInside = true;
+                    break;
+                }
+            }
+        }
+        return isInside;
+    }
+
+    // Initialize map on load using DOMContentLoaded for better reliability
+    document.addEventListener('DOMContentLoaded', initMap);
 </script>
+

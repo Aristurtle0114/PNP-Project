@@ -1,17 +1,35 @@
 <div class="h-[calc(100vh-160px)] relative z-0">
     <!-- Map Container -->
-    <div id="crimeMap" class="h-full w-full transition-all duration-500"></div>
+    <div id="leafletMap" class="h-full w-full transition-all duration-500"></div>
+
+    <!-- Floating Search Bar -->
+    <div class="absolute top-8 left-1/2 -translate-x-1/2 z-[1100] w-full max-w-md px-4">
+        <div class="relative group">
+            <input type="text" id="mapSearchInput" placeholder="Search for a place in Sta. Cruz..." class="w-full pl-14 pr-16 py-5 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-white/30 dark:border-slate-700/30 rounded-[2rem] shadow-2xl text-sm font-bold focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition-all duration-500 text-pnp-blue dark:text-pnp-gold">
+            <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-pnp-blue transition text-lg"></i>
+            <button onclick="searchLocation()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-pnp-blue text-white w-12 h-12 rounded-2xl hover:bg-blue-900 transition shadow-lg flex items-center justify-center">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <p id="searchError" class="absolute -bottom-8 left-6 text-[10px] text-red-500 font-black uppercase hidden bg-white/80 dark:bg-slate-900/80 px-3 py-1 rounded-full backdrop-blur-sm">Location not found. Try again.</p>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="mapLoading" class="absolute inset-0 bg-pnp-blue z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-500">
+        <div class="w-20 h-20 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p class="text-xs font-black uppercase tracking-[0.3em] animate-pulse">Initializing Secure Map Data...</p>
+    </div>
 
     <!-- Toggle Button (Always Visible on Desktop) -->
     <button id="sidebarToggle" onclick="toggleSidebar()" class="absolute top-8 left-8 z-[1100] w-12 h-12 bg-pnp-blue text-pnp-gold rounded-2xl shadow-2xl hidden md:flex items-center justify-center text-xl hover:bg-pnp-blue/90 transition-all duration-300 group">
-        <i class="fas fa-filter group-hover:scale-110 transition"></i>
+        <i class="fas fa-info group-hover:scale-110 transition"></i>
     </button>
 
     <!-- Floating Filter Panel -->
     <div id="filterSidebar" class="absolute top-8 left-8 z-[1000] w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden transition-all duration-500 origin-top-left sidebar-hidden">
         <div class="bg-pnp-blue p-8 pr-16 text-white relative">
-            <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Crime Statistics</h3>
-            <h4 class="text-2xl font-black tracking-tighter">Interactive Map</h4>
+            <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Location Overview</h3>
+            <h4 class="text-2xl font-black tracking-tighter">Sta. Cruz Map</h4>
             <!-- Close button inside sidebar for better UX -->
             <button onclick="toggleSidebar()" class="absolute top-8 right-8 text-pnp-gold/50 hover:text-pnp-gold transition">
                 <i class="fas fa-times text-xl"></i>
@@ -20,40 +38,68 @@
         
         <div class="p-8 space-y-8">
             <div class="space-y-4">
-                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Filter by Type</label>
-                <div class="grid grid-cols-1 gap-3">
-                    <button onclick="filterMap('All')" class="filter-btn active w-full px-5 py-3 rounded-2xl border border-gray-100 dark:border-slate-700 text-xs font-black uppercase tracking-widest transition duration-300 flex items-center justify-between group">
-                        <span>All Incidents</span>
-                        <i class="fas fa-layer-group text-[10px] group-hover:scale-110 transition"></i>
-                    </button>
-                    <button onclick="filterMap('Theft')" class="filter-btn w-full px-5 py-3 rounded-2xl border border-gray-100 dark:border-slate-700 text-xs font-black uppercase tracking-widest transition duration-300 flex items-center justify-between group dark:text-gray-300">
-                        <span>Theft</span>
-                        <span class="w-2 h-2 rounded-full bg-red-600"></span>
-                    </button>
-                    <button onclick="filterMap('Vandalism')" class="filter-btn w-full px-5 py-3 rounded-2xl border border-gray-100 dark:border-slate-700 text-xs font-black uppercase tracking-widest transition duration-300 flex items-center justify-between group dark:text-gray-300">
-                        <span>Vandalism</span>
-                        <span class="w-2 h-2 rounded-full bg-orange-500"></span>
-                    </button>
-                    <button onclick="filterMap('Assault')" class="filter-btn w-full px-5 py-3 rounded-2xl border border-gray-100 dark:border-slate-700 text-xs font-black uppercase tracking-widest transition duration-300 flex items-center justify-between group dark:text-gray-300">
-                        <span>Assault</span>
-                        <span class="w-2 h-2 rounded-full bg-red-900"></span>
-                    </button>
-                    <button onclick="filterMap('Suspicious Activity')" class="filter-btn w-full px-5 py-3 rounded-2xl border border-gray-100 dark:border-slate-700 text-xs font-black uppercase tracking-widest transition duration-300 flex items-center justify-between group dark:text-gray-300">
-                        <span>Suspicious</span>
-                        <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                    </button>
+                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Filter Incidents</label>
+                <div class="space-y-3">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold text-gray-400 uppercase">Incident Type</label>
+                        <select id="filterType" onchange="loadMapPoints()" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white">
+                            <option value="">All Types</option>
+                            <option value="Theft">Theft</option>
+                            <option value="Vandalism">Vandalism</option>
+                            <option value="Assault">Assault</option>
+                            <option value="Suspicious Activity">Suspicious Activity</option>
+                            <option value="Robbery">Robbery</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold text-gray-400 uppercase">Date Range</label>
+                        <select id="filterRange" onchange="loadMapPoints()" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white">
+                            <option value="">All Time</option>
+                            <option value="7days">Last 7 Days</option>
+                            <option value="30days">Last 30 Days</option>
+                            <option value="6months">Last 6 Months</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <div class="space-y-4 pt-8 border-t border-gray-100 dark:border-slate-700">
-                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Focus on Barangay</label>
-                <div class="relative group">
-                    <select id="barangaySelect" onchange="focusBarangay(this.value)" class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl text-xs font-black uppercase tracking-widest outline-none focus:border-pnp-gold transition appearance-none cursor-pointer">
-                        <option value="">Select Barangay</option>
-                    </select>
-                    <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-pnp-gold">
-                        <i class="fas fa-chevron-down text-[10px]"></i>
+                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Incident Legend</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-[#dc2626]"></span>
+                        <span class="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase">Theft</span>
                     </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-[#f97316]"></span>
+                        <span class="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase">Vandalism</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-[#7f1d1d]"></span>
+                        <span class="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase">Assault</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-[#eab308]"></span>
+                        <span class="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase">Suspicious</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-[#9333ea]"></span>
+                        <span class="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase">Robbery</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-[#6b7280]"></span>
+                        <span class="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase">Other</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4 pt-8 border-t border-gray-100 dark:border-slate-700">
+                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Map Information</label>
+                <div class="p-6 bg-gray-50 dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-700">
+                    <p class="text-xs font-bold text-gray-600 dark:text-gray-400 leading-relaxed">
+                        This interactive map provides a real-time overview of the Santa Cruz, Laguna area. Use the search bar above to find specific locations.
+                    </p>
                 </div>
             </div>
 
@@ -85,51 +131,354 @@
     <!-- Legend (Mobile) -->
     <div class="absolute bottom-8 right-8 z-[1000] md:hidden">
         <button onclick="toggleSidebar()" class="w-16 h-16 bg-pnp-blue text-white rounded-2xl shadow-2xl flex items-center justify-center text-2xl">
-            <i class="fas fa-filter"></i>
+            <i class="fas fa-info"></i>
         </button>
     </div>
 </div>
 
-<style>
-    .filter-btn.active {
-        background-color: #1A3A5C;
-        color: white;
-        border-color: #1A3A5C;
-        box-shadow: 0 10px 20px rgba(26, 58, 92, 0.2);
-    }
-    .filter-btn:not(.active):hover {
-        background-color: #f9fafb;
-        border-color: #C8A415;
-    }
-    .dark .filter-btn:not(.active):hover {
-        background-color: #1e293b;
-        border-color: #C8A415;
-    }
-    
-    /* Map Dark Mode Filter */
-    .dark #crimeMap {
-        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-    }
-    
-    /* Leaflet Popup Dark Mode */
-    .dark .leaflet-popup-content-wrapper, .dark .leaflet-popup-tip {
-        background: #1e293b;
-        color: #f1f5f9;
-        border: 1px solid #334155;
-    }
-    .sidebar-hidden {
-        opacity: 0;
-        transform: scale(0.9) translateX(-20px);
-        pointer-events: none;
-    }
-    .sidebar-visible {
-        opacity: 1;
-        transform: scale(1) translateX(0);
-        pointer-events: auto;
-    }
-</style>
-
 <script>
+    let map;
+    let searchMarker;
+    let santaCruzGeoJSON;
+    let incidentMarkers = L.layerGroup();
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.0.1.json';
+
+    const colors = {
+        'Theft': '#dc2626',
+        'Vandalism': '#f97316',
+        'Assault': '#7f1d1d',
+        'Suspicious Activity': '#eab308',
+        'Robbery': '#9333ea',
+        'Other': '#6b7280'
+    };
+
+    function hideLoading() {
+        const loading = document.getElementById('mapLoading');
+        if (loading) {
+            loading.classList.add('opacity-0');
+            setTimeout(() => {
+                loading.classList.add('hidden');
+            }, 500);
+        }
+    }
+
+    async function loadMapPoints() {
+        const type = document.getElementById('filterType').value;
+        const range = document.getElementById('filterRange').value;
+        
+        try {
+            const url = `/api/map-points?type=${type}&range=${range}`;
+            const response = await fetch(url);
+            const points = await response.json();
+
+            incidentMarkers.clearLayers();
+
+            points.forEach(point => {
+                const marker = L.circleMarker([point.lat, point.lng], {
+                    radius: 8,
+                    fillColor: colors[point.incident_type] || '#6b7280',
+                    color: '#FFFFFF',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                marker.bindPopup(`
+                    <div class="p-2 min-w-[150px]">
+                        <h3 class="text-pnp-blue font-black uppercase tracking-widest text-xs mb-1">${point.incident_type}</h3>
+                        <p class="text-[9px] text-gray-500 font-bold uppercase mb-2">${new Date(point.incident_date).toLocaleDateString()}</p>
+                        <p class="text-[10px] text-gray-700 dark:text-gray-300 font-medium leading-relaxed">
+                            ${point.description || 'No additional details provided.'}
+                        </p>
+                    </div>
+                `);
+
+                incidentMarkers.addLayer(marker);
+            });
+
+            incidentMarkers.addTo(map);
+        } catch (err) {
+            console.error('Error loading map points:', err);
+        }
+    }
+
+    async function searchLocation() {
+        if (!map) return;
+        
+        const input = document.getElementById('mapSearchInput');
+        const error = document.getElementById('searchError');
+        const button = input.nextElementSibling;
+        const icon = button.querySelector('i');
+        const query = input.value.trim().toLowerCase();
+        
+        if (!query) return;
+
+        error.classList.add('hidden');
+        button.disabled = true;
+        icon.className = 'fas fa-spinner fa-spin';
+        
+        try {
+            // 1. Check for Barangay match in loaded GeoJSON
+            if (santaCruzGeoJSON) {
+                const cleanQuery = query.replace(/\s+/g, '').replace('brgy.', '').replace('brgy', '').replace('barangay', '');
+                
+                const barangayMatch = santaCruzGeoJSON.features.find(f => {
+                    const name = f.properties.NAME_3.toLowerCase().replace(/\s+/g, '');
+                    // Check for exact match or if one contains the other after cleaning
+                    return cleanQuery === name || 
+                           (cleanQuery.length > 3 && name.includes(cleanQuery)) || 
+                           (name.length > 3 && cleanQuery.includes(name));
+                });
+
+                if (barangayMatch) {
+                    // Use a temporary layer to get the center of the barangay polygon
+                    const tempLayer = L.geoJSON(barangayMatch);
+                    const center = tempLayer.getBounds().getCenter();
+                    
+                    if (searchMarker) map.removeLayer(searchMarker);
+
+                    searchMarker = L.marker(center, {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `<div class="w-8 h-8 bg-pnp-gold rounded-full border-4 border-white shadow-2xl flex items-center justify-center text-pnp-blue animate-bounce">
+                                    <i class="fas fa-location-dot"></i>
+                                   </div>`,
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 32]
+                        })
+                    }).addTo(map);
+
+                    searchMarker.bindPopup(`
+                        <div class="p-2">
+                            <p class="text-[10px] font-black text-pnp-blue uppercase tracking-widest mb-1">Barangay Found</p>
+                            <p class="text-xs font-bold text-gray-600">Brgy. ${barangayMatch.properties.NAME_3}</p>
+                        </div>
+                    `).openPopup();
+
+                    map.flyTo(center, 16, {
+                        duration: 1.5
+                    });
+                    
+                    // Reset button
+                    button.disabled = false;
+                    icon.className = 'fas fa-arrow-right';
+                    return;
+                }
+            }
+
+            // 2. Fallback to Nominatim search
+            // Restrict search to Santa Cruz, Laguna area using viewbox
+            const viewbox = '121.35,14.32,121.48,14.25';
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Santa Cruz, Laguna')}&viewbox=${viewbox}&bounded=1&limit=1`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const result = data[0];
+                const lat = parseFloat(result.lat);
+                const lon = parseFloat(result.lon);
+                const latlng = { lat, lng: lon };
+
+                // Geofence check
+                if (santaCruzGeoJSON && !checkGeofence(latlng)) {
+                    error.textContent = "Location found but outside Santa Cruz perimeter.";
+                    error.classList.remove('hidden');
+                    setTimeout(() => {
+                        error.classList.add('hidden');
+                        error.textContent = "Location not found. Try again.";
+                    }, 3000);
+                    
+                    // Reset button
+                    button.disabled = false;
+                    icon.className = 'fas fa-arrow-right';
+                    return;
+                }
+
+                if (searchMarker) map.removeLayer(searchMarker);
+
+                searchMarker = L.marker([lat, lon], {
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div class="w-8 h-8 bg-pnp-gold rounded-full border-4 border-white shadow-2xl flex items-center justify-center text-pnp-blue animate-bounce">
+                                <i class="fas fa-location-dot"></i>
+                               </div>`,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32]
+                    })
+                }).addTo(map);
+
+                searchMarker.bindPopup(`
+                    <div class="p-2">
+                        <p class="text-[10px] font-black text-pnp-blue uppercase tracking-widest mb-1">Search Result</p>
+                        <p class="text-xs font-bold text-gray-600">${result.display_name.split(',')[0]}</p>
+                    </div>
+                `).openPopup();
+
+                map.flyTo([lat, lon], 16, {
+                    duration: 1.5
+                });
+            } else {
+                error.classList.remove('hidden');
+                setTimeout(() => error.classList.add('hidden'), 3000);
+            }
+        } catch (err) {
+            console.error('Search error:', err);
+            error.classList.remove('hidden');
+            setTimeout(() => error.classList.add('hidden'), 3000);
+        } finally {
+            // Reset button
+            button.disabled = false;
+            icon.className = 'fas fa-arrow-right';
+        }
+    }
+
+    // Add enter key support for search
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && document.activeElement.id === 'mapSearchInput') {
+            searchLocation();
+        }
+    });
+
+    // Simple Point in Polygon function
+    function isPointInPolygon(point, vs) {
+        const x = point[0], y = point[1];
+        let inside = false;
+        
+        if (Array.isArray(vs[0][0][0])) {
+            for (let i = 0; i < vs.length; i++) {
+                if (isPointInPolygon(point, vs[i])) return true;
+            }
+            return false;
+        }
+
+        const polygon = Array.isArray(vs[0][0]) ? vs[0] : vs;
+
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            const xi = polygon[i][0], yi = polygon[i][1];
+            const xj = polygon[j][0], yj = polygon[j][1];
+            const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
+    function checkGeofence(latlng) {
+        let isInside = false;
+        if (santaCruzGeoJSON) {
+            const point = [latlng.lng, latlng.lat];
+            for (const feature of santaCruzGeoJSON.features) {
+                if (isPointInPolygon(point, feature.geometry.coordinates)) {
+                    isInside = true;
+                    break;
+                }
+            }
+        }
+        return isInside;
+    }
+
+    function initMap() {
+        try {
+            const center = [14.2811, 121.4150];
+            
+            map = L.map('leafletMap', {
+                center: center,
+                zoom: 14,
+                zoomControl: true,
+                dragging: true,
+                touchZoom: true,
+                doubleClickZoom: true,
+                scrollWheelZoom: true,
+                boxZoom: true,
+                keyboard: true,
+                attributionControl: true
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(map);
+
+            // Initialize incident markers layer
+            incidentMarkers.addTo(map);
+            loadMapPoints();
+
+            // Hide loading as soon as map is initialized
+            hideLoading();
+
+            // Load Barangay GeoJSON
+            fetch(barangayGeoJsonUrl)
+                .then(res => {
+                    if (!res.ok) throw new Error('Network response was not ok');
+                    return res.json();
+                })
+                .then(data => {
+                    santaCruzGeoJSON = data;
+                    L.geoJSON(data, {
+                        style: function(feature) {
+                            return {
+                                fillColor: '#1A3A5C',
+                                fillOpacity: 0.1,
+                                weight: 2,
+                                color: '#C8A415'
+                            };
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const name = feature.properties.NAME_3;
+                            
+                            layer.on({
+                                mouseover: function(e) {
+                                    const layer = e.target;
+                                    layer.setStyle({
+                                        fillOpacity: 0.3,
+                                        weight: 3
+                                    });
+                                },
+                                mouseout: function(e) {
+                                    const layer = e.target;
+                                    layer.setStyle({
+                                        fillOpacity: 0.1,
+                                        weight: 2
+                                    });
+                                }
+                            });
+
+                            // Add marker for each barangay
+                            try {
+                                const centroid = layer.getBounds().getCenter();
+                                const marker = L.circleMarker(centroid, {
+                                    radius: 6,
+                                    fillColor: '#C8A415',
+                                    color: '#1A3A5C',
+                                    weight: 2,
+                                    opacity: 1,
+                                    fillOpacity: 1
+                                }).addTo(map);
+
+                                marker.bindPopup(`
+                                    <div class="p-2 min-w-[150px]">
+                                        <h3 class="text-pnp-blue font-black uppercase tracking-widest text-xs mb-1">Brgy. ${name}</h3>
+                                        <p class="text-[9px] text-gray-500 font-bold uppercase mb-2">Sta. Cruz, Laguna</p>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[8px] text-gray-400 font-bold uppercase">Status</span>
+                                            <span class="px-2 py-0.5 bg-green-100 text-green-600 rounded-full text-[7px] font-black uppercase">Secure</span>
+                                        </div>
+                                    </div>
+                                `);
+                            } catch (err) {
+                                console.error('Error adding marker for barangay:', name, err);
+                            }
+                        }
+                    }).addTo(map);
+                })
+                .catch(err => {
+                    console.error('Error loading GeoJSON:', err);
+                });
+        } catch (err) {
+            console.error('Error initializing map:', err);
+            hideLoading();
+        }
+    }
+
     function toggleSidebar() {
         const sidebar = document.getElementById('filterSidebar');
         const toggleBtn = document.getElementById('sidebarToggle');
@@ -145,141 +494,19 @@
         }
     }
 
-    const bounds = [[14.24, 121.38], [14.33, 121.46]];
-    const map = L.map('crimeMap', {
-        center: [14.2811, 121.4150],
-        zoom: 13,
-        minZoom: 12,
-        maxZoom: 17,
-        maxBounds: bounds,
-        maxBoundsViscosity: 1.0,
-        dragging: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        boxZoom: false,
-        keyboard: false,
-        touchZoom: false,
-        zoomControl: false
-    });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    let barangayLayers = {};
-
-    // Load Santa Cruz Barangays GeoJSON
-    fetch('https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.0.1.json')
-        .then(response => response.json())
-        .then(data => {
-            const select = document.getElementById('barangaySelect');
-            const sortedBarangays = data.features.sort((a, b) => a.properties.NAME_3.localeCompare(b.properties.NAME_3));
-            
-            sortedBarangays.forEach(feature => {
-                const opt = document.createElement('option');
-                opt.value = feature.properties.NAME_3;
-                opt.innerText = feature.properties.NAME_3;
-                select.appendChild(opt);
-            });
-
-            L.geoJSON(data, {
-                style: function(feature) {
-                    return {
-                        fillColor: '#1A3A5C',
-                        weight: 2,
-                        opacity: 1,
-                        color: '#C8A415',
-                        fillOpacity: 0.1
-                    };
-                },
-                onEachFeature: function(feature, layer) {
-                    barangayLayers[feature.properties.NAME_3] = layer;
-                    layer.bindPopup(`<div class="p-2 font-black uppercase tracking-widest text-xs text-pnp-blue">Brgy. ${feature.properties.NAME_3}</div>`);
-                    layer.on('mouseover', function() {
-                        this.setStyle({ fillOpacity: 0.3 });
-                    });
-                    layer.on('mouseout', function() {
-                        if (document.getElementById('barangaySelect').value !== feature.properties.NAME_3) {
-                            this.setStyle({ fillOpacity: 0.1 });
-                        }
-                    });
-                }
-            }).addTo(map);
-        })
-        .catch(err => console.error('Error loading GeoJSON:', err));
-
-    function focusBarangay(name) {
-        // Reset all styles
-        Object.values(barangayLayers).forEach(layer => {
-            layer.setStyle({ fillOpacity: 0.1, color: '#C8A415', weight: 2 });
-        });
-
-        if (name && barangayLayers[name]) {
-            const layer = barangayLayers[name];
-            layer.setStyle({ fillOpacity: 0.4, color: '#C8A415', weight: 4 });
-            layer.openPopup();
-        }
-    }
-
-    const colors = {
-        'Theft': 'red',
-        'Vandalism': 'orange',
-        'Assault': 'darkred',
-        'Suspicious Activity': 'yellow',
-        'Robbery': 'purple',
-        'Other': 'gray'
-    };
-
-    let markers = [];
-
-    async function fetchPoints() {
-        const response = await fetch('/api/map-points');
-        const points = await response.json();
-        renderPoints(points);
-    }
-
-    function renderPoints(points) {
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
-
-        points.forEach(p => {
-            const marker = L.circleMarker([p.lat, p.lng], {
-                radius: 10,
-                fillColor: colors[p.incident_type] || 'gray',
-                color: '#fff',
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.8
-            }).addTo(map).bindPopup(`
-                <div class="p-2">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">Incident Type</p>
-                    <p class="text-sm font-black text-pnp-blue dark:text-pnp-gold mb-2">${p.incident_type}</p>
-                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">Date Reported</p>
-                    <p class="text-xs font-bold text-gray-700 dark:text-gray-300">${new Date(p.incident_date).toLocaleDateString()}</p>
-                </div>
-            `);
-            marker.incident_type = p.incident_type;
-            markers.push(marker);
-        });
-    }
-
-    function filterMap(type) {
-        // Update UI
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.innerText.includes(type) || (type === 'All' && btn.innerText.includes('All'))) {
-                btn.classList.add('active');
-            }
-        });
-
-        // Filter Markers
-        markers.forEach(m => {
-            if (type === 'All' || m.incident_type === type) {
-                m.addTo(map);
-            } else {
-                map.removeLayer(m);
-            }
-        });
-    }
-
-    fetchPoints();
+    // Initialize map on load using DOMContentLoaded for better reliability
+    document.addEventListener('DOMContentLoaded', initMap);
 </script>
+
+<style>
+    .sidebar-hidden {
+        opacity: 0;
+        transform: scale(0.9) translateX(-20px);
+        pointer-events: none;
+    }
+    .sidebar-visible {
+        opacity: 1;
+        transform: scale(1) translateX(0);
+        pointer-events: auto;
+    }
+</style>

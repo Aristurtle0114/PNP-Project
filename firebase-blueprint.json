@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "System administrator or staff member",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string", "description": "Unique login name" },
+        "full_name": { "type": "string", "description": "Display name" },
+        "password_hash": { "type": "string", "description": "Bcrypt hashed password" },
+        "role": { "type": "string", "enum": ["superadmin", "staff"], "description": "Access level" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["username", "full_name", "password_hash", "role"]
+    },
+    "IncidentReport": {
+      "title": "Incident Report",
+      "description": "Publicly submitted crime or incident report",
+      "type": "object",
+      "properties": {
+        "tracking_number": { "type": "string", "description": "Unique STC-YYYY-XXXXX identifier" },
+        "type": { "type": "string", "description": "Category of incident" },
+        "incident_date": { "type": "string", "format": "date-time", "description": "When the incident occurred" },
+        "location_text": { "type": "string", "description": "Human readable address" },
+        "lat": { "type": "number", "description": "Latitude coordinate" },
+        "lng": { "type": "number", "description": "Longitude coordinate" },
+        "description": { "type": "string", "description": "Detailed narrative" },
+        "photo_path": { "type": "string", "description": "URL to evidence image" },
+        "contact_info": { "type": "string", "description": "Optional reporter contact" },
+        "status": { "type": "string", "enum": ["Received", "Under Review", "Resolved", "Closed"], "description": "Current processing state" },
+        "internal_notes": { "type": "string", "description": "Private police notes" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Submission timestamp" }
+      },
+      "required": ["tracking_number", "type", "incident_date", "location_text", "lat", "lng", "description", "status"]
+    },
+    "Bulletin": {
+      "title": "Bulletin",
+      "description": "Official police advisory or announcement",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Headline" },
+        "category": { "type": "string", "enum": ["Wanted Person", "Missing Person", "Crime Advisory", "Recovered Property", "General Announcement"], "description": "Bulletin type" },
+        "body": { "type": "string", "description": "Full text content" },
+        "photo_path": { "type": "string", "description": "URL to featured image" },
+        "is_archived": { "type": "boolean", "description": "Whether the bulletin is hidden from public view" },
+        "posted_by": { "type": "string", "description": "UID of the admin who posted it" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Posting timestamp" }
+      },
+      "required": ["title", "category", "body", "posted_by"]
+    },
+    "AnonymousTip": {
+      "title": "Anonymous Tip",
+      "description": "Confidential information submitted by citizens",
+      "type": "object",
+      "properties": {
+        "tip_id": { "type": "string", "description": "Unique tracking ID" },
+        "concern_type": { "type": "string", "description": "Category of concern" },
+        "location_text": { "type": "string", "description": "Location of interest" },
+        "description": { "type": "string", "description": "Tip details" },
+        "photo_path": { "type": "string", "description": "URL to evidence image" },
+        "is_flagged": { "type": "boolean", "description": "Whether the tip is marked for urgent attention" },
+        "admin_notes": { "type": "string", "description": "Internal police notes" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Submission timestamp" }
+      },
+      "required": ["tip_id", "concern_type", "location_text", "description"]
+    },
+    "Hotline": {
+      "title": "Hotline",
+      "description": "Emergency contact number",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Agency name" },
+        "number": { "type": "string", "description": "Phone number" },
+        "category": { "type": "string", "description": "Service type (Police, Fire, etc.)" },
+        "updated_at": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["name", "number", "category"]
+    },
+    "MapPoint": {
+      "title": "Map Point",
+      "description": "Verified incident location for public map",
+      "type": "object",
+      "properties": {
+        "lat": { "type": "number", "description": "Latitude" },
+        "lng": { "type": "number", "description": "Longitude" },
+        "incident_type": { "type": "string", "description": "Type of incident" },
+        "incident_date": { "type": "string", "format": "date", "description": "Date of incident" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["lat", "lng", "incident_type", "incident_date"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "Record of administrative actions",
+      "type": "object",
+      "properties": {
+        "admin_id": { "type": "string", "description": "UID of the admin" },
+        "action": { "type": "string", "description": "Description of action" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the action occurred" }
+      },
+      "required": ["admin_id", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Admin and staff profiles"
+    },
+    "/incident_reports/{reportId}": {
+      "schema": "IncidentReport",
+      "description": "Public incident reports"
+    },
+    "/bulletins/{bulletinId}": {
+      "schema": "Bulletin",
+      "description": "Public advisories"
+    },
+    "/anonymous_tips/{tipId}": {
+      "schema": "AnonymousTip",
+      "description": "Confidential tips"
+    },
+    "/hotlines/{hotlineId}": {
+      "schema": "Hotline",
+      "description": "Emergency contacts"
+    },
+    "/map_points/{pointId}": {
+      "schema": "MapPoint",
+      "description": "Verified incident locations"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Administrative audit trail"
+    }
+  }
+}

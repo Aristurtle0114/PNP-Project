@@ -20,7 +20,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-2">
                         <label for="type" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Type of Incident <span class="text-red-500">*</span></label>
-                        <select name="type" id="type" required class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-gray-700 dark:text-gray-300">
+                        <select name="type" id="type" required class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-gray-900 dark:text-white">
                             <option value="" disabled selected>Select Incident Type</option>
                             <option value="Theft">Theft</option>
                             <option value="Vandalism">Vandalism</option>
@@ -52,7 +52,18 @@
                     
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Pin Location on Map <span class="text-red-500">*</span></label>
-                        <div id="reportMap" class="h-80 w-full rounded-2xl border-2 border-gray-100 dark:border-slate-700 z-0 dark:brightness-90 dark:contrast-125 dark:hue-rotate-[180deg] dark:invert"></div>
+                        
+                        <!-- Map Search -->
+                        <div class="relative mb-4 group">
+                            <input type="text" id="mapSearchInput" placeholder="Search for a place or address in Sta. Cruz..." class="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition-all duration-300">
+                            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-pnp-blue transition"></i>
+                            <button type="button" onclick="searchLocation()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-pnp-blue text-white px-4 py-2 rounded-xl hover:bg-blue-900 transition text-[10px] font-black uppercase tracking-widest">
+                                Search
+                            </button>
+                        </div>
+                        <p id="searchError" class="text-[9px] text-red-500 font-bold uppercase hidden mb-4">Location not found within Santa Cruz. Try again.</p>
+
+                        <div id="leafletMap" class="h-80 w-full rounded-2xl border-2 border-gray-100 dark:border-slate-700 z-0"></div>
                         <p class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-2">Click on the map to set the exact location</p>
                         <input type="hidden" name="lat" id="lat" required>
                         <input type="hidden" name="lng" id="lng" required>
@@ -111,58 +122,127 @@
 </div>
 
 <script>
-    const bounds = [[14.24, 121.38], [14.33, 121.46]];
-    const map = L.map('reportMap', {
-        center: [14.2811, 121.4150],
-        zoom: 13,
-        minZoom: 12,
-        maxZoom: 17,
-        maxBounds: bounds,
-        maxBoundsViscosity: 1.0,
-        dragging: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        boxZoom: false,
-        keyboard: false,
-        touchZoom: false,
-        zoomControl: false
-    });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    let barangayLayer;
+    let map;
+    let marker;
     let santaCruzGeoJSON;
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.0.1.json';
 
-    // Load Santa Cruz Barangays GeoJSON for geofencing
-    fetch('https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.0.1.json')
-        .then(response => response.json())
-        .then(data => {
-            santaCruzGeoJSON = data;
-            barangayLayer = L.geoJSON(data, {
-                style: function(feature) {
-                    return {
-                        fillColor: '#1A3A5C',
-                        weight: 2,
-                        opacity: 1,
-                        color: '#C8A415',
-                        fillOpacity: 0.1
-                    };
-                },
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(`<div class="p-2 font-black uppercase tracking-widest text-xs text-pnp-blue">Brgy. ${feature.properties.NAME_3}</div>`);
-                }
+    function initMap() {
+        try {
+            const center = [14.2811, 121.4150];
+            map = L.map('leafletMap', {
+                center: center,
+                zoom: 14,
+                zoomControl: false,
+                dragging: false,
+                touchZoom: false,
+                doubleClickZoom: false,
+                scrollWheelZoom: false,
+                boxZoom: false,
+                keyboard: false,
+                attributionControl: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
             }).addTo(map);
-        })
-        .catch(err => console.error('Error loading GeoJSON:', err));
+
+            // Load GeoJSON for geofencing
+            fetch(barangayGeoJsonUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    santaCruzGeoJSON = data;
+                    L.geoJSON(data, {
+                        style: {
+                            fillColor: '#1A3A5C',
+                            fillOpacity: 0.1,
+                            weight: 2,
+                            color: '#C8A415'
+                        }
+                    }).addTo(map);
+                })
+                .catch(err => console.error('Error loading GeoJSON for geofencing:', err));
+
+            map.on('click', (e) => {
+                const latlng = e.latlng;
+                setMarker(latlng);
+            });
+        } catch (err) {
+            console.error('Error initializing report map:', err);
+        }
+    }
+
+    function setMarker(latlng) {
+        if (santaCruzGeoJSON && !checkGeofence(latlng)) {
+            alert('Please select a location within Santa Cruz, Laguna.');
+            return false;
+        }
+
+        if (marker) map.removeLayer(marker);
+        marker = L.marker(latlng).addTo(map);
+
+        document.getElementById('lat').value = latlng.lat;
+        document.getElementById('lng').value = latlng.lng;
+        return true;
+    }
+
+    async function searchLocation() {
+        const input = document.getElementById('mapSearchInput');
+        const error = document.getElementById('searchError');
+        const query = input.value.trim();
+        
+        if (!query) return;
+
+        error.classList.add('hidden');
+        
+        try {
+            const viewbox = '121.35,14.32,121.48,14.25';
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Santa Cruz, Laguna')}&viewbox=${viewbox}&bounded=1&limit=1`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const result = data[0];
+                const latlng = L.latLng(parseFloat(result.lat), parseFloat(result.lon));
+
+                if (setMarker(latlng)) {
+                    map.flyTo(latlng, 16, { duration: 1.5 });
+                } else {
+                    error.textContent = "Location found but outside Santa Cruz perimeter.";
+                    error.classList.remove('hidden');
+                    setTimeout(() => {
+                        error.classList.add('hidden');
+                        error.textContent = "Location not found within Santa Cruz. Try again.";
+                    }, 3000);
+                }
+            } else {
+                error.classList.remove('hidden');
+                setTimeout(() => error.classList.add('hidden'), 3000);
+            }
+        } catch (err) {
+            console.error('Search error:', err);
+            error.classList.remove('hidden');
+            setTimeout(() => error.classList.add('hidden'), 3000);
+        }
+    }
+
+    // Add enter key support for search
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && document.activeElement.id === 'mapSearchInput') {
+            e.preventDefault();
+            searchLocation();
+        }
+    });
 
     // Simple Point in Polygon function
     function isPointInPolygon(point, vs) {
-        // vs can be nested if it's a MultiPolygon or has holes
         const x = point[0], y = point[1];
         let inside = false;
         
-        // Handle MultiPolygon (array of polygons)
         if (Array.isArray(vs[0][0][0])) {
             for (let i = 0; i < vs.length; i++) {
                 if (isPointInPolygon(point, vs[i])) return true;
@@ -170,7 +250,6 @@
             return false;
         }
 
-        // Handle Polygon with holes (first array is outer ring)
         const polygon = Array.isArray(vs[0][0]) ? vs[0] : vs;
 
         for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
@@ -182,7 +261,6 @@
         return inside;
     }
 
-    // Main geofence check
     function checkGeofence(latlng) {
         let isInside = false;
         if (santaCruzGeoJSON) {
@@ -198,21 +276,13 @@
         return isInside;
     }
 
-    let marker;
-    map.on('click', function(e) {
-        if (santaCruzGeoJSON && !checkGeofence(e.latlng)) {
-            alert('Please select a location within Santa Cruz, Laguna.');
-            return;
-        }
-
-        if (marker) map.removeLayer(marker);
-        marker = L.marker(e.latlng).addTo(map);
-        document.getElementById('lat').value = e.latlng.lat;
-        document.getElementById('lng').value = e.latlng.lng;
-    });
-
     // Auto-set current date/time
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('incident_date').value = now.toISOString().slice(0, 16);
+
+    // Initialize map on load using DOMContentLoaded for better reliability
+    document.addEventListener('DOMContentLoaded', initMap);
 </script>
+
+

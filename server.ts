@@ -1,4 +1,4 @@
-import './seed.ts';
+import './seed-firestore.ts';
 import app from './app.ts';
 import http from 'http';
 import path from 'path';
