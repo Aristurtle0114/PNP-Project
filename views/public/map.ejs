@@ -118,6 +118,16 @@
             </div>
 
             <div class="pt-8 border-t border-gray-100 dark:border-slate-700">
+                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4 block">Map Controls</label>
+                <button id="mapInteractionToggle" onclick="toggleMapInteraction()" class="w-full flex items-center justify-between px-6 py-4 bg-pnp-blue text-white rounded-2xl hover:bg-blue-900 transition-all duration-300 shadow-lg group mb-4">
+                    <div class="flex items-center space-x-3">
+                        <i id="lockIcon" class="fas fa-lock text-pnp-gold group-hover:scale-110 transition"></i>
+                        <span id="lockText" class="text-[10px] font-black uppercase tracking-widest">Map Locked</span>
+                    </div>
+                    <span class="text-[8px] font-bold text-pnp-gold/50 uppercase">Toggle</span>
+                </button>
+                <p class="text-[9px] text-gray-400 font-bold uppercase text-center mb-6">Unlock to explore the map manually</p>
+
                 <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400">
                     <i class="fas fa-info-circle text-pnp-gold"></i>
                     <p class="text-[10px] font-bold uppercase tracking-widest leading-relaxed">
@@ -141,7 +151,45 @@
     let searchMarker;
     let santaCruzGeoJSON;
     let incidentMarkers = L.layerGroup();
+    let isMapLocked = true;
     const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.0.1.json';
+
+    function toggleMapInteraction() {
+        if (!map) return;
+        
+        isMapLocked = !isMapLocked;
+        const lockIcon = document.getElementById('lockIcon');
+        const lockText = document.getElementById('lockText');
+        const toggleBtn = document.getElementById('mapInteractionToggle');
+
+        if (isMapLocked) {
+            map.dragging.disable();
+            map.touchZoom.disable();
+            map.doubleClickZoom.disable();
+            map.scrollWheelZoom.disable();
+            map.boxZoom.disable();
+            map.keyboard.disable();
+            if (map.zoomControl) map.zoomControl.remove();
+            
+            lockIcon.className = 'fas fa-lock text-pnp-gold group-hover:scale-110 transition';
+            lockText.textContent = 'Map Locked';
+            toggleBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            toggleBtn.classList.add('bg-pnp-blue', 'hover:bg-blue-900');
+        } else {
+            map.dragging.enable();
+            map.touchZoom.enable();
+            map.doubleClickZoom.enable();
+            map.scrollWheelZoom.enable();
+            map.boxZoom.enable();
+            map.keyboard.enable();
+            L.control.zoom({ position: 'topright' }).addTo(map);
+            
+            lockIcon.className = 'fas fa-lock-open text-white group-hover:scale-110 transition';
+            lockText.textContent = 'Map Unlocked';
+            toggleBtn.classList.remove('bg-pnp-blue', 'hover:bg-blue-900');
+            toggleBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        }
+    }
 
     const colors = {
         'Theft': '#dc2626',
@@ -384,13 +432,13 @@
             map = L.map('leafletMap', {
                 center: center,
                 zoom: 14,
-                zoomControl: true,
-                dragging: true,
-                touchZoom: true,
-                doubleClickZoom: true,
-                scrollWheelZoom: true,
-                boxZoom: true,
-                keyboard: true,
+                zoomControl: false,
+                dragging: false,
+                touchZoom: false,
+                doubleClickZoom: false,
+                scrollWheelZoom: false,
+                boxZoom: false,
+                keyboard: false,
                 attributionControl: true
             });
 
