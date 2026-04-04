@@ -1,7 +1,7 @@
 import { mockHotlines, mockReports, mockBulletins, mockUsers, mockTips, mockAuditLogs, mockMapPoints } from '../data/mockData';
 
-// Mock Firestore Wrapper to simulate Firebase without the SDK
-class AdminFirestoreWrapper {
+// Mock Data Service to simulate a database without any external SDKs
+class DataService {
   collection(path: string) {
     let data: any[] = [];
     if (path === 'hotlines') data = mockHotlines;
@@ -94,7 +94,7 @@ class DocWrapper {
   async delete() { /* No-op for mock */ }
 }
 
-export const db: any = new AdminFirestoreWrapper();
+export const db: any = new DataService();
 export const auth: any = {
   currentUser: null,
   onAuthStateChanged: (cb: any) => cb(null)
