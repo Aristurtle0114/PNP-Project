@@ -1,160 +1,97 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { 
-  getFirestore, 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  limit, 
-  orderBy, 
-  getCountFromServer,
-  writeBatch,
-  DocumentReference,
-  CollectionReference,
-  Query,
-  QuerySnapshot
-} from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import fs from 'fs';
-import path from 'path';
+import { mockHotlines, mockReports, mockBulletins, mockUsers } from '../data/mockData';
 
-const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
-const firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
-const firestore = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-
-// Mimic Admin SDK API to minimize changes in controllers
+// Mock Firestore Wrapper to simulate Firebase without the SDK
 class AdminFirestoreWrapper {
   collection(path: string) {
-    return new CollectionWrapper(collection(firestore, path));
+    let data: any[] = [];
+    if (path === 'hotlines') data = mockHotlines;
+    if (path === 'incident_reports') data = mockReports;
+    if (path === 'bulletins') data = mockBulletins;
+    if (path === 'users') data = mockUsers;
+    
+    return new CollectionWrapper(data);
   }
   batch() {
-    const batch = writeBatch(firestore);
     return {
-      set: (docRef: any, data: any) => batch.set(docRef.ref, data),
-      update: (docRef: any, data: any) => batch.update(docRef.ref, data),
-      delete: (docRef: any) => batch.delete(docRef.ref),
-      commit: () => batch.commit()
+      set: () => {},
+      update: () => {},
+      delete: () => {},
+      commit: async () => {}
     };
   }
 }
 
 class CollectionWrapper {
-  constructor(private ref: CollectionReference) {}
+  constructor(private data: any[]) {}
   
   doc(id?: string) {
-    return new DocWrapper(id ? doc(this.ref, id) : doc(this.ref));
+    const item = id ? this.data.find(d => d.id === id) : null;
+    return new DocWrapper(item || { id: id || 'new-id' });
   }
   
-  where(field: string, op: any, value: any) {
-    return new QueryWrapper(query(this.ref, where(field, op, value)));
+  where(field: string, op: string, value: any) {
+    const filtered = this.data.filter(d => {
+      if (op === '==') return d[field] === value;
+      if (op === '>=') return d[field] >= value;
+      if (op === '<=') return d[field] <= value;
+      return true;
+    });
+    return new CollectionWrapper(filtered);
   }
   
   orderBy(field: string, direction: 'asc' | 'desc' = 'asc') {
-    return new QueryWrapper(query(this.ref, orderBy(field, direction)));
+    const sorted = [...this.data].sort((a, b) => {
+      if (a[field] < b[field]) return direction === 'asc' ? -1 : 1;
+      if (a[field] > b[field]) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return new CollectionWrapper(sorted);
   }
   
   limit(n: number) {
-    return new QueryWrapper(query(this.ref, limit(n)));
+    return new CollectionWrapper(this.data.slice(0, n));
   }
   
   async get() {
-    const snap = await getDocs(this.ref);
-    return new QuerySnapshotWrapper(snap);
+    return {
+      docs: this.data.map(d => ({ id: d.id, data: () => d })),
+      empty: this.data.length === 0,
+      size: this.data.length
+    };
   }
   
   async add(data: any) {
-    const docRef = await addDoc(this.ref, data);
-    return new DocWrapper(docRef);
+    const newDoc = { id: Math.random().toString(36).substr(2, 9), ...data };
+    this.data.push(newDoc);
+    return new DocWrapper(newDoc);
   }
   
   count() {
     return {
-      get: async () => {
-        const snap = await getCountFromServer(this.ref);
-        return { data: () => ({ count: snap.data().count }) };
-      }
-    };
-  }
-}
-
-class QueryWrapper {
-  constructor(private q: Query) {}
-  
-  where(field: string, op: any, value: any) {
-    return new QueryWrapper(query(this.q, where(field, op, value)));
-  }
-  
-  orderBy(field: string, direction: 'asc' | 'desc' = 'asc') {
-    return new QueryWrapper(query(this.q, orderBy(field, direction)));
-  }
-  
-  limit(n: number) {
-    return new QueryWrapper(query(this.q, limit(n)));
-  }
-  
-  async get() {
-    const snap = await getDocs(this.q);
-    return new QuerySnapshotWrapper(snap);
-  }
-  
-  count() {
-    return {
-      get: async () => {
-        const snap = await getCountFromServer(this.q);
-        return { data: () => ({ count: snap.data().count }) };
-      }
+      get: async () => ({ data: () => ({ count: this.data.length }) })
     };
   }
 }
 
 class DocWrapper {
-  constructor(public ref: DocumentReference) {}
+  constructor(private item: any) {}
+  get ref() { return this; }
   
   async get() {
-    const snap = await getDoc(this.ref);
     return {
-      id: snap.id,
-      exists: snap.exists(),
-      data: () => snap.data()
+      id: this.item.id,
+      exists: !!this.item.created_at || !!this.item.username,
+      data: () => this.item
     };
   }
   
-  async set(data: any) {
-    await setDoc(this.ref, data);
-  }
-  
-  async update(data: any) {
-    await updateDoc(this.ref, data);
-  }
-  
-  async delete() {
-    await deleteDoc(this.ref);
-  }
-}
-
-class QuerySnapshotWrapper {
-  constructor(private snap: QuerySnapshot) {}
-  get docs() {
-    return this.snap.docs.map(d => ({
-      id: d.id,
-      data: () => d.data()
-    }));
-  }
-  get empty() {
-    return this.snap.empty;
-  }
-  get size() {
-    return this.snap.size;
-  }
+  async set(data: any) { Object.assign(this.item, data); }
+  async update(data: any) { Object.assign(this.item, data); }
+  async delete() { /* No-op for mock */ }
 }
 
 export const db = new AdminFirestoreWrapper() as any;
-export const auth = getAuth(app);
+export const auth = {
+  currentUser: null,
+  onAuthStateChanged: (cb: any) => cb(null)
+} as any;

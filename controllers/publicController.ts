@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { db } from '../config/firebase.ts';
+import { db } from '../config/firebase';
 import { v4 as uuidv4 } from 'uuid';
 
 export const getHome = async (req: Request, res: Response) => {
