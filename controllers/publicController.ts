@@ -135,8 +135,7 @@ export const getMapPoints = async (req: Request, res: Response) => {
 export const getBulletins = async (req: Request, res: Response) => {
   const { category, search, page = 1 } = req.query;
   const limit = 10;
-  // Firestore doesn't support offset well for large datasets, but for this app it's fine to use limit/startAfter or just fetch and slice if small.
-  // However, for simplicity, we'll just fetch with limit.
+  // For simplicity, we'll just fetch with limit.
   
   try {
     let query: any = db.collection('bulletins').where('is_archived', '==', false);
@@ -145,8 +144,7 @@ export const getBulletins = async (req: Request, res: Response) => {
       query = query.where('category', '==', category);
     }
 
-    // Firestore doesn't support LIKE queries. We'll fetch and filter in memory if search is present,
-    // or just ignore search for now if we want to stay purely server-side.
+    // We'll fetch and filter in memory if search is present.
     // Given the small scale, we'll fetch and filter.
     
     const snap = await query.orderBy('created_at', 'desc').get();

@@ -14,9 +14,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Favicon handler at the very top to avoid middleware overhead/errors
-app.get('/favicon.ico', (req, res) => res.status(204).end());
-
 // Trust proxy for Vercel/Cloud Run
 app.set('trust proxy', 1);
 
@@ -61,6 +58,9 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Health Check
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // Routes
 import publicRoutes from './routes/public';
