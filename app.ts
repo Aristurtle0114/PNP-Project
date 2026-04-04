@@ -14,6 +14,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Favicon handler at the very top to avoid middleware overhead/errors
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // Trust proxy for Vercel/Cloud Run
 app.set('trust proxy', 1);
 
@@ -22,7 +25,7 @@ app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 // Session
 app.use(session({
@@ -37,7 +40,7 @@ app.use(session({
 
 // View Engine
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(process.cwd(), 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
@@ -80,12 +83,23 @@ app.use((req, res, next) => {
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server Error:', err);
   const status = err.status || 500;
-  res.status(status).render('error', { 
-    error: {
-      message: err.message || 'An unexpected error occurred.',
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-    }
-  });
+  
+  try {
+    res.status(status).render('error', { 
+      error: {
+        message: err.message || 'An unexpected error occurred.',
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      }
+    });
+  } catch (renderError) {
+    console.error('Render Error:', renderError);
+    res.status(status).send(`
+      <h1>System Error</h1>
+      <p>${err.message || 'An unexpected error occurred.'}</p>
+      <hr>
+      <p><small>Secondary error: Failed to render error page.</small></p>
+    `);
+  }
 });
 
 export default app;
