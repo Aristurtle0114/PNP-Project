@@ -1,7 +1,5 @@
 import app from './app';
 import http from 'http';
-import path from 'path';
-import { createServer as createViteServer } from 'vite';
 
 const PORT = 3000;
 

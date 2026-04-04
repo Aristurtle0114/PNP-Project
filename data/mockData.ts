@@ -69,3 +69,15 @@ export const mockUsers = [
     created_at: new Date().toISOString()
   }
 ];
+
+export const mockTips = [
+  { id: 'tip1', content: 'Suspicious activity near the park.', created_at: new Date().toISOString(), is_flagged: false }
+];
+
+export const mockAuditLogs = [
+  { id: 'log1', admin_id: 'superadmin', action: 'Logged in', timestamp: new Date().toISOString() }
+];
+
+export const mockMapPoints = [
+  { id: 'point1', lat: 14.2811, lng: 121.4122, incident_type: 'Theft', incident_date: new Date().toISOString() }
+];

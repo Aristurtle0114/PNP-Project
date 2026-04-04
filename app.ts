@@ -11,6 +11,9 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy for Vercel/Cloud Run
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(morgan('dev'));
 app.use(cors());

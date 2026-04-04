@@ -1,4 +1,4 @@
-import { mockHotlines, mockReports, mockBulletins, mockUsers } from '../data/mockData';
+import { mockHotlines, mockReports, mockBulletins, mockUsers, mockTips, mockAuditLogs, mockMapPoints } from '../data/mockData';
 
 // Mock Firestore Wrapper to simulate Firebase without the SDK
 class AdminFirestoreWrapper {
@@ -8,6 +8,9 @@ class AdminFirestoreWrapper {
     if (path === 'incident_reports') data = mockReports;
     if (path === 'bulletins') data = mockBulletins;
     if (path === 'users') data = mockUsers;
+    if (path === 'anonymous_tips') data = mockTips;
+    if (path === 'audit_logs') data = mockAuditLogs;
+    if (path === 'map_points') data = mockMapPoints;
     
     return new CollectionWrapper(data);
   }
