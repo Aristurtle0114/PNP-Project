@@ -1,5 +1,5 @@
-import './seed-firestore.ts';
-import app from './app.ts';
+import './seed-firestore';
+import app from './app';
 import http from 'http';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';

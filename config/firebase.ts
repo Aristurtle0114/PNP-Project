@@ -21,7 +21,11 @@ import {
   QuerySnapshot
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import firebaseConfig from '../firebase-applet-config.json' assert { type: 'json' };
+import fs from 'fs';
+import path from 'path';
+
+const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
+const firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const firestore = getFirestore(app, firebaseConfig.firestoreDatabaseId);

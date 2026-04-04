@@ -3,9 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "tsx server.ts",
     "dev": "tsx server.ts",
+    "seed": "tsx seed-firestore.ts",
     "build": "echo 'No build step required for SSR'",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"

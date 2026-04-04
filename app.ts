@@ -46,8 +46,8 @@ app.use((req, res, next) => {
 });
 
 // Routes
-import publicRoutes from './routes/public.ts';
-import adminRoutes from './routes/admin.ts';
+import publicRoutes from './routes/public';
+import adminRoutes from './routes/admin';
 
 // Favicon handler to prevent 500/404 noise
 app.get('/favicon.ico', (req, res) => res.status(204).end());

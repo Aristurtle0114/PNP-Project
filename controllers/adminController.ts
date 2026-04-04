@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { db } from '../config/firebase.ts';
+import { db } from '../config/firebase';
 import bcrypt from 'bcryptjs';
 
 export const getLogin = (req: Request, res: Response) => {

@@ -1,4 +1,4 @@
-import { db, auth } from './config/firebase.ts';
+import { db, auth } from './config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import bcrypt from 'bcryptjs';
 
