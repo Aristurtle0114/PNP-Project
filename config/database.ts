@@ -1,4 +1,4 @@
-import { mockHotlines, mockReports, mockBulletins, mockUsers, mockTips, mockAuditLogs, mockMapPoints } from '../data/mockData';
+import { mockHotlines, mockReports, mockBulletins, mockUsers, mockTips, mockAuditLogs, mockMapPoints } from '../data/mockData.js';
 
 // Mock Data Service to simulate a database without any external SDKs
 class DataService {

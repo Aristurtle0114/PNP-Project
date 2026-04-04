@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Favicon handler at the very top to avoid middleware overhead/errors
-app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.get(['/favicon.ico', '/favicon.png'], (req, res) => res.status(204).end());
 
 // Trust proxy for Vercel/Cloud Run
 app.set('trust proxy', 1);
@@ -66,8 +66,8 @@ app.use((req, res, next) => {
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // Routes
-import publicRoutes from './routes/public';
-import adminRoutes from './routes/admin';
+import publicRoutes from './routes/public.js';
+import adminRoutes from './routes/admin.js';
 
 app.use('/', publicRoutes);
 app.use('/admin', adminRoutes);

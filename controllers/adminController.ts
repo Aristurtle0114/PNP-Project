@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { db } from '../config/database';
+import { db } from '../config/database.js';
 import bcrypt from 'bcryptjs';
 
 export const getLogin = (req: Request, res: Response) => {
