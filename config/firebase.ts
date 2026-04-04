@@ -5,20 +5,20 @@ class AdminFirestoreWrapper {
   collection(path: string) {
     let data: any[] = [];
     if (path === 'hotlines') data = mockHotlines;
-    if (path === 'incident_reports') data = mockReports;
-    if (path === 'bulletins') data = mockBulletins;
-    if (path === 'users') data = mockUsers;
-    if (path === 'anonymous_tips') data = mockTips;
-    if (path === 'audit_logs') data = mockAuditLogs;
-    if (path === 'map_points') data = mockMapPoints;
+    else if (path === 'incident_reports') data = mockReports;
+    else if (path === 'bulletins') data = mockBulletins;
+    else if (path === 'users') data = mockUsers;
+    else if (path === 'anonymous_tips') data = mockTips;
+    else if (path === 'audit_logs') data = mockAuditLogs;
+    else if (path === 'map_points') data = mockMapPoints;
     
     return new CollectionWrapper(data);
   }
   batch() {
     return {
-      set: () => {},
-      update: () => {},
-      delete: () => {},
+      set: (ref: any, data: any) => {},
+      update: (ref: any, data: any) => {},
+      delete: (ref: any) => {},
       commit: async () => {}
     };
   }
@@ -29,7 +29,7 @@ class CollectionWrapper {
   
   doc(id?: string) {
     const item = id ? this.data.find(d => d.id === id) : null;
-    return new DocWrapper(item || { id: id || 'new-id' });
+    return new DocWrapper(item || { id: id || Math.random().toString(36).substr(2, 9) });
   }
   
   where(field: string, op: string, value: any) {
@@ -79,11 +79,12 @@ class CollectionWrapper {
 class DocWrapper {
   constructor(private item: any) {}
   get ref() { return this; }
+  get id() { return this.item.id; }
   
   async get() {
     return {
       id: this.item.id,
-      exists: !!this.item.created_at || !!this.item.username,
+      exists: !!this.item.username || !!this.item.tracking_number || !!this.item.title || !!this.item.name,
       data: () => this.item
     };
   }
@@ -93,8 +94,8 @@ class DocWrapper {
   async delete() { /* No-op for mock */ }
 }
 
-export const db = new AdminFirestoreWrapper() as any;
-export const auth = {
+export const db: any = new AdminFirestoreWrapper();
+export const auth: any = {
   currentUser: null,
   onAuthStateChanged: (cb: any) => cb(null)
-} as any;
+};
