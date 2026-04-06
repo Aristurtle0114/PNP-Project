@@ -5,6 +5,7 @@ import expressLayouts from 'express-ejs-layouts';
 import session from 'express-session';
 import morgan from 'morgan';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -22,6 +23,11 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(morgan('dev'));
+app.use(cookieParser());
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} - Session ID: ${req.sessionID}`);
+  next();
+});
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -30,10 +36,12 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 // Session
 app.use(session({
   secret: process.env.SESSION_SECRET || 'cpicrs-secret-key',
-  resave: false,
-  saveUninitialized: true, // Changed to true to ensure session existence
+  resave: true,
+  saveUninitialized: true,
+  proxy: true, // Trust the reverse proxy
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
+    sameSite: 'none',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -46,6 +54,12 @@ app.set('layout', 'layouts/main');
 
 // Global Variables for Views
 app.use((req, res, next) => {
+  res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  res.header('Expires', '-1');
+  res.header('Pragma', 'no-cache');
+  
+  res.locals.sessionId = req.sessionID;
+  
   if (req.session) {
     res.locals.user = req.session.user || null;
     res.locals.success_msg = req.session.success_msg || null;
@@ -64,6 +78,19 @@ app.use((req, res, next) => {
 
 // Health Check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
+// Session Test
+app.get('/api/session-test', (req: any, res) => {
+  req.session.test = (req.session.test || 0) + 1;
+  res.cookie('test_cookie', 'working', { secure: true, sameSite: 'none' });
+  res.json({ 
+    sessionID: req.sessionID, 
+    test: req.session.test, 
+    user: req.session.user || 'not logged in',
+    cookie: req.session.cookie,
+    cookies_received: req.cookies || 'no cookies'
+  });
+});
 
 // Routes
 import publicRoutes from './routes/public.js';

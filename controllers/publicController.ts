@@ -103,11 +103,15 @@ export const getMap = (req: Request, res: Response) => {
 };
 
 export const getMapPoints = async (req: Request, res: Response) => {
-  const { type, range } = req.query;
+  const { type, range, barangay } = req.query;
   let query: any = db.collection('map_points');
 
   if (type) {
     query = query.where('incident_type', '==', type);
+  }
+
+  if (barangay) {
+    query = query.where('barangay', '==', barangay);
   }
 
   if (range) {

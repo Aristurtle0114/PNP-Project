@@ -1,18 +1,6 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-160px)]">
     <!-- Map Area -->
     <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden relative z-0">
-        <!-- Map Search -->
-        <div class="absolute top-4 left-4 right-4 md:right-auto md:w-80 z-[1000]">
-            <div class="relative group">
-                <input type="text" id="mapSearchInput" placeholder="Search location in Sta. Cruz..." class="w-full pl-10 pr-4 py-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition-all duration-300 shadow-2xl dark:text-white">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-pnp-blue transition"></i>
-                <button type="button" onclick="searchLocation()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-pnp-blue text-white px-3 py-1.5 rounded-lg hover:bg-blue-900 transition text-[10px] font-black uppercase tracking-widest">
-                    Go
-                </button>
-            </div>
-            <p id="searchError" class="mt-2 px-3 py-1 bg-red-500 text-white text-[9px] font-black uppercase rounded-lg hidden shadow-lg">Location not found in Sta. Cruz</p>
-        </div>
-
         <div id="leafletMap" class="h-full w-full"></div>
         <div class="absolute bottom-4 right-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-700 z-[1000] text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest">
             <i class="fas fa-info-circle mr-2 text-pnp-gold"></i>
@@ -39,6 +27,31 @@
                 </div>
                 
                 <div class="space-y-2">
+                    <label for="barangay" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Barangay</label>
+                    <select name="barangay" id="barangay" required class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+                        <option value="Alipit">Alipit</option>
+                        <option value="Bagumbayan">Bagumbayan</option>
+                        <option value="Bubukal">Bubukal</option>
+                        <option value="Calios">Calios</option>
+                        <option value="Duhat">Duhat</option>
+                        <option value="Gatid">Gatid</option>
+                        <option value="Jasaan">Jasaan</option>
+                        <option value="Labuin">Labuin</option>
+                        <option value="Malinao">Malinao</option>
+                        <option value="Oogong">Oogong</option>
+                        <option value="Pagsawitan">Pagsawitan</option>
+                        <option value="Palasan">Palasan</option>
+                        <option value="Patimbao">Patimbao</option>
+                        <option value="Poblacion">Poblacion</option>
+                        <option value="San Jose">San Jose</option>
+                        <option value="San Juan">San Juan</option>
+                        <option value="San Nicolas">San Nicolas</option>
+                        <option value="Santisima Cruz">Santisima Cruz</option>
+                        <option value="Santo Angel">Santo Angel</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
                     <label for="incident_type" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Incident Type</label>
                     <select name="incident_type" id="incident_type" required class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                         <option value="Theft">Theft</option>
@@ -60,37 +73,6 @@
                 </button>
             </form>
         </div>
-
-        <!-- Legend -->
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-            <h4 class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Color Codes</h4>
-            <div class="space-y-3">
-                <div class="flex items-center space-x-3">
-                    <span class="w-3 h-3 rounded-full bg-red-600"></span>
-                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Theft</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="w-3 h-3 rounded-full bg-orange-500"></span>
-                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Vandalism</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="w-3 h-3 rounded-full bg-red-900"></span>
-                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Assault</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Suspicious Activity</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="w-3 h-3 rounded-full bg-purple-600"></span>
-                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Robbery</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="w-3 h-3 rounded-full bg-gray-500"></span>
-                    <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">Other</span>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -111,18 +93,7 @@
     function initMap() {
         try {
             const center = [14.2811, 121.4150];
-            map = L.map('leafletMap', {
-                center: center,
-                zoom: 14,
-                zoomControl: false,
-                dragging: false,
-                touchZoom: false,
-                doubleClickZoom: false,
-                scrollWheelZoom: false,
-                boxZoom: false,
-                keyboard: false,
-                attributionControl: false
-            });
+            map = L.map('leafletMap').setView(center, 14);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
@@ -130,18 +101,15 @@
 
             // Load GeoJSON for geofencing
             fetch(barangayGeoJsonUrl)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     santaCruzGeoJSON = data;
                     L.geoJSON(data, {
                         style: {
-                            fillColor: '#1A3A5C',
-                            fillOpacity: 0.05,
+                            color: '#C8A415',
                             weight: 1,
-                            color: '#C8A415'
+                            fillOpacity: 0.05,
+                            fillColor: '#1A3A5C'
                         }
                     }).addTo(map);
                 })
@@ -149,18 +117,18 @@
 
             // Render Existing Points
             <% points.forEach(p => { %>
-                L.circle([<%= p.lat %>, <%= p.lng %>], {
-                    color: '#FFFFFF',
+                L.circleMarker([<%= p.lat %>, <%= p.lng %>], {
+                    radius: 6,
                     fillColor: colors['<%= p.incident_type %>'] || '#6b7280',
-                    fillOpacity: 0.8,
-                    radius: 50,
-                    weight: 2
-                }).addTo(map);
+                    color: '#FFFFFF',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map).bindPopup(`<b><%= p.incident_type %></b><br><%= new Date(p.incident_date).toLocaleDateString() %>`);
             <% }) %>
 
             map.on('click', (e) => {
-                const latlng = e.latlng;
-                setMarker(latlng);
+                setMarker(e.latlng);
             });
         } catch (err) {
             console.error('Error initializing admin map:', err);
@@ -180,56 +148,6 @@
         document.getElementById('lng').value = latlng.lng.toFixed(6);
         return true;
     }
-
-    async function searchLocation() {
-        const input = document.getElementById('mapSearchInput');
-        const error = document.getElementById('searchError');
-        const query = input.value.trim();
-        
-        if (!query) return;
-
-        error.classList.add('hidden');
-        
-        try {
-            // Viewbox for Sta. Cruz, Laguna
-            const viewbox = '121.35,14.32,121.48,14.25';
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Santa Cruz, Laguna')}&viewbox=${viewbox}&bounded=1&limit=1`;
-            
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data && data.length > 0) {
-                const result = data[0];
-                const latlng = L.latLng(parseFloat(result.lat), parseFloat(result.lon));
-
-                if (setMarker(latlng)) {
-                    map.flyTo(latlng, 16, { duration: 1.5 });
-                } else {
-                    error.textContent = "Location found but outside Santa Cruz perimeter.";
-                    error.classList.remove('hidden');
-                    setTimeout(() => {
-                        error.classList.add('hidden');
-                        error.textContent = "Location not found in Sta. Cruz";
-                    }, 3000);
-                }
-            } else {
-                error.classList.remove('hidden');
-                setTimeout(() => error.classList.add('hidden'), 3000);
-            }
-        } catch (err) {
-            console.error('Search error:', err);
-            error.classList.remove('hidden');
-            setTimeout(() => error.classList.add('hidden'), 3000);
-        }
-    }
-
-    // Add enter key support for search
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && document.activeElement.id === 'mapSearchInput') {
-            e.preventDefault();
-            searchLocation();
-        }
-    });
 
     // Simple Point in Polygon function
     function isPointInPolygon(point, vs) {
@@ -261,6 +179,15 @@
             for (const feature of santaCruzGeoJSON.features) {
                 if (isPointInPolygon(point, feature.geometry.coordinates)) {
                     isInside = true;
+                    // Auto-select barangay in dropdown
+                    const barangaySelect = document.getElementById('barangay');
+                    const name = feature.properties.NAME_3;
+                    for (let i = 0; i < barangaySelect.options.length; i++) {
+                        if (barangaySelect.options[i].value === name) {
+                            barangaySelect.selectedIndex = i;
+                            break;
+                        }
+                    }
                     break;
                 }
             }
@@ -268,7 +195,9 @@
         return isInside;
     }
 
-    // Initialize map on load using DOMContentLoaded for better reliability
+    // Auto-set current date
+    document.getElementById('incident_date').valueAsDate = new Date();
+
     document.addEventListener('DOMContentLoaded', initMap);
 </script>
 

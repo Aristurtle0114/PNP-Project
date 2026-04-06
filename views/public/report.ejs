@@ -130,18 +130,7 @@
     function initMap() {
         try {
             const center = [14.2811, 121.4150];
-            map = L.map('leafletMap', {
-                center: center,
-                zoom: 14,
-                zoomControl: false,
-                dragging: false,
-                touchZoom: false,
-                doubleClickZoom: false,
-                scrollWheelZoom: false,
-                boxZoom: false,
-                keyboard: false,
-                attributionControl: false
-            });
+            map = L.map('leafletMap').setView(center, 14);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
@@ -149,26 +138,22 @@
 
             // Load GeoJSON for geofencing
             fetch(barangayGeoJsonUrl)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     santaCruzGeoJSON = data;
                     L.geoJSON(data, {
                         style: {
-                            fillColor: '#1A3A5C',
-                            fillOpacity: 0.1,
+                            color: '#C8A415',
                             weight: 2,
-                            color: '#C8A415'
+                            fillOpacity: 0.1,
+                            fillColor: '#1A3A5C'
                         }
                     }).addTo(map);
                 })
                 .catch(err => console.error('Error loading GeoJSON for geofencing:', err));
 
             map.on('click', (e) => {
-                const latlng = e.latlng;
-                setMarker(latlng);
+                setMarker(e.latlng);
             });
         } catch (err) {
             console.error('Error initializing report map:', err);
@@ -199,18 +184,19 @@
         error.classList.add('hidden');
         
         try {
-            const viewbox = '121.35,14.32,121.48,14.25';
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Santa Cruz, Laguna')}&viewbox=${viewbox}&bounded=1&limit=1`;
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Santa Cruz, Laguna')}&limit=1`;
             
             const response = await fetch(url);
             const data = await response.json();
 
             if (data && data.length > 0) {
                 const result = data[0];
-                const latlng = L.latLng(parseFloat(result.lat), parseFloat(result.lon));
+                const lat = parseFloat(result.lat);
+                const lng = parseFloat(result.lon);
+                const latlng = { lat, lng };
 
                 if (setMarker(latlng)) {
-                    map.flyTo(latlng, 16, { duration: 1.5 });
+                    map.setView([lat, lng], 16);
                 } else {
                     error.textContent = "Location found but outside Santa Cruz perimeter.";
                     error.classList.remove('hidden');
@@ -281,7 +267,6 @@
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('incident_date').value = now.toISOString().slice(0, 16);
 
-    // Initialize map on load using DOMContentLoaded for better reliability
     document.addEventListener('DOMContentLoaded', initMap);
 </script>
 

@@ -71,13 +71,34 @@ export const mockUsers = [
 ];
 
 export const mockTips = [
-  { id: 'tip1', content: 'Suspicious activity near the park.', created_at: new Date().toISOString(), is_flagged: false }
+  { 
+    id: 'tip1', 
+    tip_id: 'TIP-001',
+    concern_type: 'Suspicious Activity',
+    location_text: 'Sta. Cruz Park',
+    content: 'Suspicious activity near the park.', 
+    created_at: new Date().toISOString(), 
+    is_flagged: false 
+  }
 ];
 
 export const mockAuditLogs = [
-  { id: 'log1', admin_id: 'superadmin', action: 'Logged in', timestamp: new Date().toISOString() }
+  { 
+    id: 'log1', 
+    admin_id: 'superadmin', 
+    username: 'superadmin',
+    action: 'Logged in', 
+    details: 'Admin logged into the system',
+    timestamp: new Date().toISOString() 
+  }
 ];
 
 export const mockMapPoints = [
-  { id: 'point1', lat: 14.2811, lng: 121.4122, incident_type: 'Theft', incident_date: new Date().toISOString() }
+  { id: 'point1', lat: 14.2811, lng: 121.4122, incident_type: 'Theft', incident_date: new Date().toISOString(), barangay: 'Poblacion' },
+  { id: 'point2', lat: 14.2750, lng: 121.4050, incident_type: 'Assault', incident_date: new Date().toISOString(), barangay: 'Bagumbayan' },
+  { id: 'point3', lat: 14.2900, lng: 121.4200, incident_type: 'Theft', incident_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), barangay: 'Poblacion' },
+  { id: 'point4', lat: 14.2850, lng: 121.4150, incident_type: 'Vandalism', incident_date: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(), barangay: 'Poblacion' },
+  { id: 'point5', lat: 14.2700, lng: 121.4000, incident_type: 'Robbery', incident_date: new Date().toISOString(), barangay: 'Bagumbayan' },
+  { id: 'point6', lat: 14.2800, lng: 121.4300, incident_type: 'Theft', incident_date: new Date().toISOString(), barangay: 'Bubukal' },
+  { id: 'point7', lat: 14.2820, lng: 121.4130, incident_type: 'Theft', incident_date: new Date().toISOString(), barangay: 'Poblacion' },
 ];
