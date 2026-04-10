@@ -79,19 +79,6 @@ app.use((req, res, next) => {
 // Health Check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
-// Session Test
-app.get('/api/session-test', (req: any, res) => {
-  req.session.test = (req.session.test || 0) + 1;
-  res.cookie('test_cookie', 'working', { secure: true, sameSite: 'none' });
-  res.json({ 
-    sessionID: req.sessionID, 
-    test: req.session.test, 
-    user: req.session.user || 'not logged in',
-    cookie: req.session.cookie,
-    cookies_received: req.cookies || 'no cookies'
-  });
-});
-
 // Routes
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';

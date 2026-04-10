@@ -9,11 +9,8 @@ export const getLogin = (req: Request, res: Response) => {
 
 export const postLogin = async (req: Request, res: Response) => {
   const { username, password } = req.body;
-  console.log('Login attempt for username: [' + username + ']');
-  console.log('Cookies received at login:', req.cookies);
   
   if (!req.session) {
-    console.error('CRITICAL: Session middleware not working!');
     return res.status(500).send('Session error: No session object found');
   }
 
@@ -21,36 +18,27 @@ export const postLogin = async (req: Request, res: Response) => {
     const snap = await db.collection('users').where('username', '==', username).limit(1).get();
     
     if (snap.empty) {
-      console.log('No user found with username:', username);
       return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
     }
 
     const user = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
-    console.log('User found:', user.username, 'Role:', user.role);
 
     // Fallback for plain text 'admin123' if bcrypt fails or for easier testing
     const isPasswordCorrect = bcrypt.compareSync(password, user.password_hash) || (password === 'admin123' && user.username === 'superadmin');
 
     if (isPasswordCorrect) {
-      console.log('Password correct for user:', user.username);
       req.session.user = { id: user.id, username: user.username, full_name: user.full_name, role: user.role };
       
-      console.log('Session Cookie Config:', req.session.cookie);
-      console.log('Attempting to save session...');
       req.session.save((err) => {
         if (err) {
-          console.error('CRITICAL: Session save error:', err);
           return res.status(500).send('Error saving session');
         }
-        console.log('Session saved successfully. Redirecting to /admin/dashboard');
         res.redirect('/admin/dashboard');
       });
     } else {
-      console.log('Invalid password for user:', user.username);
       res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
     }
   } catch (err) {
-    console.error('CRITICAL: Login error:', err);
     res.status(500).send('Error during login');
   }
 };
@@ -62,75 +50,29 @@ export const getLogout = (req: Request, res: Response) => {
 };
 
 export const getDashboard = async (req: Request, res: Response) => {
-  console.log('Loading dashboard for user:', req.session.user?.username);
   try {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
     const [
-      totalReportsSnap,
-      pendingReportsSnap,
-      reportsThisMonthSnap,
       activeBulletinsSnap,
       tipsReceivedSnap,
-      resolvedCasesSnap,
-      allReportsSnap,
+      totalUsersSnap,
       recentTipsSnap,
       recentLogsSnap
     ] = await Promise.all([
-      db.collection('incident_reports').count().get(),
-      db.collection('incident_reports').where('status', '==', 'Received').count().get(),
-      db.collection('incident_reports').where('created_at', '>=', startOfMonth).count().get(),
       db.collection('bulletins').where('is_archived', '==', false).count().get(),
       db.collection('anonymous_tips').count().get(),
-      db.collection('incident_reports').where('status', '==', 'Resolved').count().get(),
-      db.collection('incident_reports').get(), // For grouping in memory
+      db.collection('users').count().get(),
       db.collection('anonymous_tips').orderBy('created_at', 'desc').limit(5).get(),
       db.collection('audit_logs').orderBy('timestamp', 'desc').limit(5).get()
     ]);
 
     const stats = {
-      totalReports: totalReportsSnap.data().count,
-      pendingReports: pendingReportsSnap.data().count,
-      reportsThisMonth: reportsThisMonthSnap.data().count,
       activeBulletins: activeBulletinsSnap.data().count,
       tipsReceived: tipsReceivedSnap.data().count,
-      resolvedCases: resolvedCasesSnap.data().count,
+      totalUsers: totalUsersSnap.data().count
     };
-
-    // Grouping in memory for charts
-    const reports = allReportsSnap.docs.map(doc => doc.data());
-    
-    const typeCounts: Record<string, number> = {};
-    reports.forEach(r => {
-      if (r && r.type) {
-        typeCounts[r.type] = (typeCounts[r.type] || 0) + 1;
-      }
-    });
-    const reportsByType = Object.entries(typeCounts).map(([type, count]) => ({ type, count }));
-
-    const monthCounts: Record<string, number> = {};
-    reports.forEach(r => {
-      if (r && r.created_at) {
-        const month = r.created_at.substring(0, 7);
-        monthCounts[month] = (monthCounts[month] || 0) + 1;
-      }
-    });
-    const reportsByMonth = Object.entries(monthCounts)
-      .map(([month, count]) => ({ month, count }))
-      .sort((a, b) => b.month.localeCompare(a.month))
-      .slice(0, 6)
-      .reverse();
-
-    const recentReports = allReportsSnap.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }))
-      .sort((a: any, b: any) => b.created_at.localeCompare(a.created_at))
-      .slice(0, 5);
 
     const recentTips = recentTipsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
-    // For audit logs, we need to fetch user names if they are not stored in the log
-    // Assuming audit_logs store admin_name or we fetch them
     const recentLogs = await Promise.all(recentLogsSnap.docs.map(async doc => {
       const log = doc.data();
       const userDoc = await db.collection('users').doc(log.admin_id).get();
@@ -140,9 +82,6 @@ export const getDashboard = async (req: Request, res: Response) => {
     res.render('admin/dashboard', { 
       title: 'Dashboard', 
       stats, 
-      reportsByType, 
-      reportsByMonth, 
-      recentReports, 
       recentTips, 
       recentLogs,
       layout: 'layouts/admin' 
@@ -150,67 +89,6 @@ export const getDashboard = async (req: Request, res: Response) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading dashboard');
-  }
-};
-
-export const getReports = async (req: Request, res: Response) => {
-  const { status, type, page = 1 } = req.query;
-  const limit = 10;
-  
-  try {
-    let query: any = db.collection('incident_reports');
-
-    if (status) query = query.where('status', '==', status);
-    if (type) query = query.where('type', '==', type);
-
-    const snap = await query.orderBy('created_at', 'desc').get();
-    let reports = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-
-    const offset = (Number(page) - 1) * limit;
-    reports = reports.slice(offset, offset + limit);
-
-    res.render('admin/reports', { title: 'Incident Reports', reports, status, type, page: Number(page), layout: 'layouts/admin' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading reports');
-  }
-};
-
-export const getReportDetail = async (req: Request, res: Response) => {
-  try {
-    const doc = await db.collection('incident_reports').doc(req.params.id).get();
-    if (!doc.exists) return res.status(404).send('Report not found');
-    const report = { id: doc.id, ...doc.data() };
-    res.render('admin/report_detail', { title: 'Report Detail', report, layout: 'layouts/admin' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading report detail');
-  }
-};
-
-export const updateReportStatus = async (req: Request, res: Response) => {
-  const { status, internal_notes } = req.body;
-  
-  try {
-    await db.collection('incident_reports').doc(req.params.id).update({
-      status,
-      internal_notes,
-      updated_at: new Date().toISOString()
-    });
-    
-    // Audit Log
-    await db.collection('audit_logs').add({
-      admin_id: req.session.user.id,
-      action: `Updated status to ${status}`,
-      target_table: 'incident_reports',
-      target_id: req.params.id,
-      timestamp: new Date().toISOString()
-    });
-
-    res.redirect(`/admin/reports/${req.params.id}`);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error updating report status');
   }
 };
 

@@ -1,11 +1,10 @@
-import { mockHotlines, mockReports, mockBulletins, mockUsers, mockTips, mockAuditLogs, mockMapPoints } from '../data/mockData.js';
+import { mockHotlines, mockBulletins, mockUsers, mockTips, mockAuditLogs, mockMapPoints } from '../data/mockData.js';
 
 // Mock Data Service to simulate a database without any external SDKs
 class DataService {
   collection(path: string) {
     let data: any[] = [];
     if (path === 'hotlines') data = mockHotlines;
-    else if (path === 'incident_reports') data = mockReports;
     else if (path === 'bulletins') data = mockBulletins;
     else if (path === 'users') data = mockUsers;
     else if (path === 'anonymous_tips') data = mockTips;
@@ -84,7 +83,7 @@ class DocWrapper {
   async get() {
     return {
       id: this.item.id,
-      exists: !!this.item.username || !!this.item.tracking_number || !!this.item.title || !!this.item.name,
+      exists: !!this.item.username || !!this.item.title || !!this.item.name,
       data: () => this.item
     };
   }

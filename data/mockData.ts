@@ -6,35 +6,6 @@ export const mockHotlines = [
   { id: '5', name: 'Red Cross Laguna', number: '0956-789-0123', category: 'Medical' }
 ];
 
-export const mockReports = [
-  {
-    id: 'rep1',
-    tracking_number: 'STC-2026-00001',
-    type: 'Theft',
-    incident_date: new Date().toISOString(),
-    location_text: 'Poblacion, Sta. Cruz',
-    lat: 14.2811,
-    lng: 121.4122,
-    description: 'Sample theft report for mockup.',
-    status: 'Received',
-    photo_path: 'https://picsum.photos/seed/rep1/800/600',
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 'rep2',
-    tracking_number: 'STC-2026-00002',
-    type: 'Assault',
-    incident_date: new Date().toISOString(),
-    location_text: 'Brgy. Bagumbayan, Sta. Cruz',
-    lat: 14.2750,
-    lng: 121.4050,
-    description: 'Sample assault report for mockup.',
-    status: 'Under Review',
-    photo_path: 'https://picsum.photos/seed/rep2/800/600',
-    created_at: new Date().toISOString()
-  }
-];
-
 export const mockBulletins = [
   {
     id: 'bul1',

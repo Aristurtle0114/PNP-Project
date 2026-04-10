@@ -4,9 +4,6 @@ import * as publicController from '../controllers/publicController.js';
 const router = Router();
 
 router.get('/', publicController.getHome);
-router.get('/report', publicController.getReport);
-router.post('/report', publicController.postReport);
-router.get('/track', publicController.getTrack);
 router.get('/map', publicController.getMap);
 router.get('/api/map-points', publicController.getMapPoints);
 router.get('/bulletins', publicController.getBulletins);

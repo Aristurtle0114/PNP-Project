@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-160px)]">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-100px)]">
     <!-- Map Area -->
     <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden relative z-0">
         <div id="leafletMap" class="h-full w-full"></div>
@@ -80,7 +80,80 @@
     let map;
     let tempMarker;
     let santaCruzGeoJSON;
-    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.0.1.json';
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.json';
+    function drawGrid() {
+        if (!map) return;
+        const step = 0.005;
+        const bounds = map.getBounds();
+        const north = bounds.getNorth() + step;
+        const south = bounds.getSouth() - step;
+        const east = bounds.getEast() + step;
+        const west = bounds.getWest() - step;
+
+        const gridStyle = {
+            color: '#94a3b8',
+            weight: 1,
+            opacity: 0.3,
+            interactive: false,
+            dashArray: '5, 5'
+        };
+
+        for (let lat = Math.floor(south / step) * step; lat <= north; lat += step) {
+            L.polyline([[lat, west], [lat, east]], gridStyle).addTo(map);
+            L.marker([lat, west + 0.001], {
+                icon: L.divIcon({
+                    className: 'grid-label',
+                    html: `<span class="text-[8px] font-mono text-gray-400">${lat.toFixed(4)}</span>`,
+                    iconSize: [40, 10]
+                })
+            }).addTo(map);
+        }
+
+        for (let lng = Math.floor(west / step) * step; lng <= east; lng += step) {
+            L.polyline([[south, lng], [north, lng]], gridStyle).addTo(map);
+            L.marker([north - 0.001, lng], {
+                icon: L.divIcon({
+                    className: 'grid-label',
+                    html: `<span class="text-[8px] font-mono text-gray-400">${lng.toFixed(4)}</span>`,
+                    iconSize: [40, 10]
+                })
+            }).addTo(map);
+        }
+    }
+
+    function addCornerCoordinates() {
+        if (!map) return;
+        const bounds = map.getBounds();
+        const corners = [
+            { pos: bounds.getNorthWest(), label: 'NW' },
+            { pos: bounds.getNorthEast(), label: 'NE' },
+            { pos: bounds.getSouthWest(), label: 'SW' },
+            { pos: bounds.getSouthEast(), label: 'SE' }
+        ];
+
+        corners.forEach(corner => {
+            const lat = corner.pos.lat.toFixed(4);
+            const lng = corner.pos.lng.toFixed(4);
+            
+            L.marker(corner.pos, {
+                icon: L.divIcon({
+                    className: 'corner-coord-container',
+                    html: `
+                        <div class="corner-coord-trigger group relative">
+                            <div class="w-4 h-4 border-2 border-pnp-gold rounded-full bg-pnp-blue/50 backdrop-blur-sm"></div>
+                            <div class="absolute invisible group-hover:visible bg-pnp-blue text-white text-[10px] font-mono p-2 rounded shadow-xl whitespace-nowrap z-[2000] ${corner.label.includes('E') ? 'right-6' : 'left-6'} ${corner.label.includes('N') ? 'top-0' : 'bottom-0'}">
+                                <span class="text-pnp-gold font-black mr-1">${corner.label}:</span> ${lat}, ${lng}
+                            </div>
+                        </div>
+                    `,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                }),
+                interactive: true
+            }).addTo(map);
+        });
+    }
+
     const colors = {
         'Theft': '#dc2626',
         'Vandalism': '#f97316',
@@ -92,12 +165,27 @@
 
     function initMap() {
         try {
-            const center = [14.2811, 121.4150];
-            map = L.map('leafletMap').setView(center, 14);
+            const center = [14.2500, 121.4134];
+            map = L.map('leafletMap', {
+                center: center,
+                zoom: 12,
+                zoomControl: false,
+                dragging: false,
+                touchZoom: false,
+                doubleClickZoom: false,
+                scrollWheelZoom: false,
+                boxZoom: false,
+                keyboard: false,
+                attributionControl: true
+            });
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
             }).addTo(map);
+
+            // Draw Grid Overlay
+            drawGrid();
+            addCornerCoordinates();
 
             // Load GeoJSON for geofencing
             fetch(barangayGeoJsonUrl)

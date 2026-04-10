@@ -1,4 +1,4 @@
-<div class="h-[calc(100vh-160px)] relative z-0">
+<div class="h-[calc(100vh-100px)] relative z-0">
     <!-- Map Container -->
     <div id="leafletMap" class="h-full w-full transition-all duration-500"></div>
 
@@ -108,16 +108,6 @@
             </div>
 
             <div class="pt-8 border-t border-gray-100 dark:border-slate-700">
-                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4 block">Map Controls</label>
-                <button id="mapInteractionToggle" onclick="toggleMapInteraction()" class="w-full flex items-center justify-between px-6 py-4 bg-pnp-blue text-white rounded-2xl hover:bg-blue-900 transition-all duration-300 shadow-lg group mb-4">
-                    <div class="flex items-center space-x-3">
-                        <i id="lockIcon" class="fas fa-lock text-pnp-gold group-hover:scale-110 transition"></i>
-                        <span id="lockText" class="text-[10px] font-black uppercase tracking-widest">Map Locked</span>
-                    </div>
-                    <span class="text-[8px] font-bold text-pnp-gold/50 uppercase">Toggle</span>
-                </button>
-                <p class="text-[9px] text-gray-400 font-bold uppercase text-center mb-6">Unlock to explore the map manually</p>
-
                 <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400">
                     <i class="fas fa-info-circle text-pnp-gold"></i>
                     <p class="text-[10px] font-bold uppercase tracking-widest leading-relaxed">
@@ -141,44 +131,83 @@
     let searchMarker;
     let santaCruzGeoJSON;
     let incidentMarkers = L.layerGroup();
-    let isMapLocked = true;
-    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.0.1.json';
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.json';
 
-    function toggleMapInteraction() {
+    function drawGrid() {
         if (!map) return;
-        
-        isMapLocked = !isMapLocked;
-        const lockIcon = document.getElementById('lockIcon');
-        const lockText = document.getElementById('lockText');
-        const toggleBtn = document.getElementById('mapInteractionToggle');
+        const step = 0.005; // Grid interval in degrees
+        const bounds = map.getBounds();
+        const north = bounds.getNorth() + step;
+        const south = bounds.getSouth() - step;
+        const east = bounds.getEast() + step;
+        const west = bounds.getWest() - step;
 
-        if (isMapLocked) {
-            map.dragging.disable();
-            map.touchZoom.disable();
-            map.doubleClickZoom.disable();
-            map.scrollWheelZoom.disable();
-            map.boxZoom.disable();
-            map.keyboard.disable();
-            if (map.zoomControl) map.zoomControl.remove();
-            
-            lockIcon.className = 'fas fa-lock text-pnp-gold group-hover:scale-110 transition';
-            lockText.textContent = 'Map Locked';
-            toggleBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-            toggleBtn.classList.add('bg-pnp-blue', 'hover:bg-blue-900');
-        } else {
-            map.dragging.enable();
-            map.touchZoom.enable();
-            map.doubleClickZoom.enable();
-            map.scrollWheelZoom.enable();
-            map.boxZoom.enable();
-            map.keyboard.enable();
-            L.control.zoom({ position: 'topright' }).addTo(map);
-            
-            lockIcon.className = 'fas fa-lock-open text-white group-hover:scale-110 transition';
-            lockText.textContent = 'Map Unlocked';
-            toggleBtn.classList.remove('bg-pnp-blue', 'hover:bg-blue-900');
-            toggleBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        const gridStyle = {
+            color: '#94a3b8',
+            weight: 1,
+            opacity: 0.3,
+            interactive: false,
+            dashArray: '5, 5'
+        };
+
+        // Draw latitude lines
+        for (let lat = Math.floor(south / step) * step; lat <= north; lat += step) {
+            L.polyline([[lat, west], [lat, east]], gridStyle).addTo(map);
+            // Add coordinate labels
+            L.marker([lat, west + 0.001], {
+                icon: L.divIcon({
+                    className: 'grid-label',
+                    html: `<span class="text-[8px] font-mono text-gray-400">${lat.toFixed(4)}</span>`,
+                    iconSize: [40, 10]
+                })
+            }).addTo(map);
         }
+
+        // Draw longitude lines
+        for (let lng = Math.floor(west / step) * step; lng <= east; lng += step) {
+            L.polyline([[south, lng], [north, lng]], gridStyle).addTo(map);
+            // Add coordinate labels
+            L.marker([north - 0.001, lng], {
+                icon: L.divIcon({
+                    className: 'grid-label',
+                    html: `<span class="text-[8px] font-mono text-gray-400">${lng.toFixed(4)}</span>`,
+                    iconSize: [40, 10]
+                })
+            }).addTo(map);
+        }
+    }
+
+    function addCornerCoordinates() {
+        if (!map) return;
+        const bounds = map.getBounds();
+        const corners = [
+            { pos: bounds.getNorthWest(), label: 'NW' },
+            { pos: bounds.getNorthEast(), label: 'NE' },
+            { pos: bounds.getSouthWest(), label: 'SW' },
+            { pos: bounds.getSouthEast(), label: 'SE' }
+        ];
+
+        corners.forEach(corner => {
+            const lat = corner.pos.lat.toFixed(4);
+            const lng = corner.pos.lng.toFixed(4);
+            
+            L.marker(corner.pos, {
+                icon: L.divIcon({
+                    className: 'corner-coord-container',
+                    html: `
+                        <div class="corner-coord-trigger group relative">
+                            <div class="w-4 h-4 border-2 border-pnp-gold rounded-full bg-pnp-blue/50 backdrop-blur-sm"></div>
+                            <div class="absolute invisible group-hover:visible bg-pnp-blue text-white text-[10px] font-mono p-2 rounded shadow-xl whitespace-nowrap z-[2000] ${corner.label.includes('E') ? 'right-6' : 'left-6'} ${corner.label.includes('N') ? 'top-0' : 'bottom-0'}">
+                                <span class="text-pnp-gold font-black mr-1">${corner.label}:</span> ${lat}, ${lng}
+                            </div>
+                        </div>
+                    `,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                }),
+                interactive: true
+            }).addTo(map);
+        });
     }
 
     const colors = {
@@ -324,11 +353,11 @@
 
     function initMap() {
         try {
-            const center = [14.2811, 121.4150];
+            const center = [14.2500, 121.4134];
             
             map = L.map('leafletMap', {
                 center: center,
-                zoom: 14,
+                zoom: 12,
                 zoomControl: false,
                 dragging: false,
                 touchZoom: false,
@@ -346,6 +375,10 @@
             // Initialize incident markers layer
             incidentMarkers.addTo(map);
             loadMapPoints();
+
+            // Draw Grid Overlay
+            drawGrid();
+            addCornerCoordinates();
 
             // Hide loading as soon as map is initialized
             hideLoading();
@@ -439,7 +472,6 @@
         }
     }
 
-    // Initialize map on load using DOMContentLoaded for better reliability
     document.addEventListener('DOMContentLoaded', initMap);
 </script>
 

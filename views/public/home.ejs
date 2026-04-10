@@ -5,8 +5,8 @@
         <h1 class="text-4xl md:text-6xl font-extrabold text-pnp-gold mb-4 tracking-tight">PNP STA. CRUZ, LAGUNA</h1>
         <p class="text-xl md:text-2xl font-light mb-8 max-w-3xl mx-auto">Serving and Protecting the community of Sta. Cruz with integrity and commitment.</p>
         <div class="flex flex-wrap justify-center gap-4">
-            <a href="/report" class="bg-pnp-gold hover:bg-yellow-600 text-pnp-blue font-bold py-3 px-8 rounded-full shadow-lg transition duration-300">Report Incident</a>
-            <a href="/tip" class="bg-white hover:bg-gray-100 text-pnp-blue font-bold py-3 px-8 rounded-full shadow-lg transition duration-300">Submit Tip</a>
+            <a href="/tip" class="bg-pnp-gold hover:bg-yellow-600 text-pnp-blue font-bold py-3 px-8 rounded-full shadow-lg transition duration-300">Submit Tip</a>
+            <a href="/bulletins" class="bg-white hover:bg-gray-100 text-pnp-blue font-bold py-3 px-8 rounded-full shadow-lg transition duration-300">View Bulletins</a>
         </div>
     </div>
 </section>
@@ -14,13 +14,7 @@
 <!-- Quick Actions -->
 <section class="py-12 bg-white dark:bg-slate-800 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            <a href="/report" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
-                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-pnp-blue dark:text-blue-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-pnp-blue group-hover:text-white transition">
-                    <i class="fas fa-file-signature text-2xl"></i>
-                </div>
-                <span class="font-bold text-gray-800 dark:text-gray-200">Report Incident</span>
-            </a>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <a href="/map" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
                 <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-red-600 group-hover:text-white transition">
                     <i class="fas fa-map-location-dot text-2xl"></i>
@@ -39,11 +33,11 @@
                 </div>
                 <span class="font-bold text-gray-800 dark:text-gray-200">Submit Tip</span>
             </a>
-            <a href="/track" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
+            <a href="/hotlines" class="flex flex-col items-center p-6 bg-gray-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition group">
                 <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-green-600 group-hover:text-white transition">
-                    <i class="fas fa-magnifying-glass text-2xl"></i>
+                    <i class="fas fa-phone-volume text-2xl"></i>
                 </div>
-                <span class="font-bold text-gray-800 dark:text-gray-200">Track Report</span>
+                <span class="font-bold text-gray-800 dark:text-gray-200">Hotlines</span>
             </a>
         </div>
     </div>
@@ -52,18 +46,14 @@
 <!-- Stats Bar -->
 <section class="bg-gray-100 dark:bg-slate-900 py-8 border-y border-gray-200 dark:border-slate-800 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-                <p class="text-3xl font-bold text-pnp-blue dark:text-pnp-gold"><%= stats.totalReports %></p>
-                <p class="text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold">Reports This Month</p>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
             <div>
                 <p class="text-3xl font-bold text-pnp-blue dark:text-pnp-gold"><%= stats.activeBulletins %></p>
                 <p class="text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold">Active Bulletins</p>
             </div>
             <div>
-                <p class="text-3xl font-bold text-pnp-blue dark:text-pnp-gold"><%= stats.resolvedCases %></p>
-                <p class="text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold">Resolved Cases</p>
+                <p class="text-3xl font-bold text-pnp-blue dark:text-pnp-gold"><%= stats.tipsReceived %></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wider font-semibold">Tips Received</p>
             </div>
         </div>
     </div>
