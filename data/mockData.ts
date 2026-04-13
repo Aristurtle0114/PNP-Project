@@ -1,5 +1,5 @@
 export const mockHotlines = [
-  { id: '1', name: 'PNP Sta. Cruz', number: '0912-345-6789', category: 'Police' },
+  { id: '1', name: 'PNP Sta. Cruz', number: '0998 598 5667', category: 'Police' },
   { id: '2', name: 'BFP Sta. Cruz', number: '0923-456-7890', category: 'Fire' },
   { id: '3', name: 'Sta. Cruz Rescue', number: '0934-567-8901', category: 'Emergency' },
   { id: '4', name: 'MDRRMO', number: '0945-678-9012', category: 'Disaster' },
@@ -12,7 +12,7 @@ export const mockBulletins = [
     title: 'Missing Person: Juan Dela Cruz',
     category: 'Missing Person',
     body: 'Last seen wearing a blue shirt near the plaza.',
-    photo_path: 'https://picsum.photos/seed/bul1/800/600',
+    photo_path: 'https://picsum.photos/seed/pnp-missing-person/800/600',
     is_archived: false,
     posted_by: 'superadmin',
     created_at: new Date().toISOString()
@@ -22,7 +22,7 @@ export const mockBulletins = [
     title: 'Crime Advisory: Night Patrols',
     category: 'Crime Advisory',
     body: 'Increased police presence in residential areas.',
-    photo_path: 'https://picsum.photos/seed/bul2/800/600',
+    photo_path: 'https://picsum.photos/seed/pnp-night-patrol/800/600',
     is_archived: false,
     posted_by: 'superadmin',
     created_at: new Date().toISOString()

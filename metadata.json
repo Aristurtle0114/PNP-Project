@@ -1,5 +1,5 @@
 {
-  "name": "Sta. Cruz Laguna CPICRS",
-  "description": "Community-Police Information & Crime Reporting System for Santa Cruz, Laguna. Features real-time crime mapping, public bulletins, and secure incident reporting.",
+  "name": "Sta. Cruz Crime Mapping & Reporting System",
+  "description": "A specialized crime visualization and incident reporting platform for PNP Sta. Cruz, Laguna, featuring interactive geospatial mapping and public safety analytics.",
   "requestFramePermissions": ["geolocation"]
 }
